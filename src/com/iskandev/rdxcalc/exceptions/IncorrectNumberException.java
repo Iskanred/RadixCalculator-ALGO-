@@ -7,7 +7,7 @@ package com.iskandev.rdxcalc.exceptions;
  * {@link com.iskandev.rdxcalc.algoengine.Number}-class objects throw the
  * {@code IncorrectNumberException}-class exceptions
  *
- * @see com.iskandev.rdxcalc.exceptions.NumberException
+ * @see NumberException
  */
 public final class IncorrectNumberException extends NumberException {
 

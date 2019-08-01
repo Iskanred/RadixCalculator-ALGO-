@@ -11,8 +11,6 @@ import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
  * Class works with {@link Number}-class objects
  *
  * <b>Objects of {@code ArithmeticOperation}-class are Immutable!</b>
- *
- * @see com.iskandev.rdxcalc.algoengine.Number
  */
 final class ArithmeticOperation {
 
@@ -53,8 +51,6 @@ final class ArithmeticOperation {
      *
      * @param arithmeticSign is the sign which is used for operation, it is the {@link ArithmeticSign}-enum object
      * @throws IllegalArgumentException when incorrect numbers appears while performing an operation
-     *
-     * @see com.iskandev.rdxcalc.enums.ArithmeticSign
      */
     ArithmeticOperation(final Number number1, final Number number2, final ArithmeticSign arithmeticSign) throws IllegalArgumentException {
         this.radix = number1.getRadix(); // or number2.getRadix();

@@ -148,8 +148,6 @@ public final class Number /* implements Comparable<Number> */ {
      * @throws IncorrectNumberException if an incorrect number appears during the converting
      *
      * To convert number used the class {@link Converter}
-     *
-     * @see com.iskandev.rdxcalc.algoengine.Converter
      */
     public Number convertTo(final int radix) throws IncorrectNumberException {
         try {
@@ -167,9 +165,7 @@ public final class Number /* implements Comparable<Number> */ {
      * @return a new number, which is the sum between the current number and the addend-number
      * @throws IncorrectNumberException if an incorrect number appears during the operation
      *
-     * To perform the operation used the class {@link ArithmeticException}
-     *
-     * @see com.iskandev.rdxcalc.algoengine.ArithmeticOperation
+     * To perform the operation used the class {@link ArithmeticOperation}
      */
     public Number add(final Number addendNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
@@ -188,9 +184,7 @@ public final class Number /* implements Comparable<Number> */ {
      * @return a new number, which is the difference between the current number and the subtrahend-number
      * @throws IncorrectNumberException if an incorrect number appears during the operation
      *
-     * To perform the operation used the class {@link ArithmeticException}
-     *
-     * @see com.iskandev.rdxcalc.algoengine.ArithmeticOperation
+     * To perform the operation used the class {@link ArithmeticOperation}
      */
     public Number subtract(final Number subtrahendNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
@@ -209,9 +203,7 @@ public final class Number /* implements Comparable<Number> */ {
      * @return a new number, which is the product between the current number and the multiplicand-number
      * @throws IncorrectNumberException if an incorrect number appears during the operation
      *
-     * To perform the operation used the class {@link ArithmeticException}
-     *
-     * @see com.iskandev.rdxcalc.algoengine.ArithmeticOperation
+     * To perform the operation used the class {@link ArithmeticOperation}
      */
     public Number multiply(final Number multiplicandNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
@@ -230,9 +222,7 @@ public final class Number /* implements Comparable<Number> */ {
      * @return a new number, which is the quotient between the current number and the divisor-number
      * @throws IncorrectNumberException if an incorrect number appears during the operation
      *
-     * To perform the operation used the class {@code ArithmeticOperation}
-     *
-     * @see com.iskandev.rdxcalc.algoengine.ArithmeticOperation
+     * To perform the operation used the class {@link ArithmeticOperation}
      */
     public Number divide(final Number divisorNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system

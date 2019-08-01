@@ -7,7 +7,7 @@ package com.iskandev.rdxcalc.exceptions;
  * {@link com.iskandev.rdxcalc.algoengine.Number}-class objects throw the
  * {@code TooLargeNumberException}-class exceptions
  *
- * @see com.iskandev.rdxcalc.exceptions.NumberException
+ * @see NumberException
  */
 public final class TooLargeNumberException extends NumberException {
 

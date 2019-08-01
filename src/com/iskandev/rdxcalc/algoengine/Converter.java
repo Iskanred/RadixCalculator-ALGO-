@@ -13,8 +13,6 @@ import java.math.RoundingMode;
  * Class works with {@link Number}-class objects
  *
  * <b>Objects of {@code Converter}-class class are Immutable!</b>
- *
- * @see com.iskandev.rdxcalc.algoengine.Number
  */
 final class Converter {
 
@@ -75,8 +73,6 @@ final class Converter {
      *
      * @return digit, which is the <i>radix-representation</i> of the 'num'-@param
      * For ex. (num = 4, returns 4 num = 10, returns A, num = 36, return Z)
-     *
-     * @see com.iskandev.rdxcalc.algoengine.ArithmeticOperation
      */
     static char getDigitRadixRepresent(final int num) {
         return (char)(num <= 9 ? num + 48 : num + 55);
@@ -237,8 +233,6 @@ final class Converter {
      * @param number is the number which it's necessary to raise to a power
      * @param exponent is the exponent used to get a power
      * @return the 'number'-@param to the power of the 'exponent'-@param
-     *
-     * @see Math
      */
     private int getPowerInt(final int number, final int exponent) {
         int result = number; // the number to the power one

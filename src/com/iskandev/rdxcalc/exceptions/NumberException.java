@@ -12,10 +12,9 @@ package com.iskandev.rdxcalc.exceptions;
  * But its are used to create new exception-classes that extend from this
  *
  * <i>Children:<i/>
- * @see com.iskandev.rdxcalc.exceptions.IncorrectNumberException
- * @see com.iskandev.rdxcalc.exceptions.TooLargeNumberException
+ * @see IncorrectNumberException
+ * @see TooLargeNumberException
  *
- * @see com.iskandev.rdxcalc.algoengine.Number
  * @see Exception
  */
 class NumberException extends Exception {
