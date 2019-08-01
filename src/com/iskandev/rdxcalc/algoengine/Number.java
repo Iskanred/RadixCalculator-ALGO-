@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 /**
  * Class {@code Number} is the key-class, which was created to store number and its specific properties
- * <b>Objects of this class are Immutable!</b>
+ * <b>Objects of {@code Number}-class class are Immutable!</b>
  */
 public final class Number /* implements Comparable<Number> */ {
 

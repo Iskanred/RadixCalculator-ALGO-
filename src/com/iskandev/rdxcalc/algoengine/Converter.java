@@ -12,6 +12,8 @@ import java.math.RoundingMode;
  *
  * Class works with {@link Number}-class objects
  *
+ * <b>Objects of {@code Converter}-class class are Immutable!</b>
+ *
  * @see com.iskandev.rdxcalc.algoengine.Number
  */
 final class Converter {

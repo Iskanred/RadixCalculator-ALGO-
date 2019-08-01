@@ -10,6 +10,8 @@ import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
  *
  * Class works with {@link Number}-class objects
  *
+ * <b>Objects of {@code ArithmeticOperation}-class are Immutable!</b>
+ *
  * @see com.iskandev.rdxcalc.algoengine.Number
  */
 final class ArithmeticOperation {
