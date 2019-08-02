@@ -1,6 +1,5 @@
 package com.iskandev.rdxcalc.algoengine;
 
-import com.iskandev.rdxcalc.enums.ArithmeticSign;
 import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
 
 /**
@@ -15,24 +14,18 @@ import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
 final class ArithmeticOperation {
 
     /**
-     * This is the number that is the result of an arithmetic operation
-     *
-     * Gets value from the constructor:
-     * {@link ArithmeticOperation#ArithmeticOperation(Number, Number, ArithmeticSign)}
-     *
-     * Getting access to this field from the outside provides getter:
-     * {@link ArithmeticOperation#getResultNumber()}
-     */
-    private final Number resultNumber;
-
-    /**
      * This is the radix of the numeral-system in which both of numbers are represented for performing
      * an arithmetic operation
      *
      * Gets value from the constructor:
-     * {@link ArithmeticOperation#ArithmeticOperation(Number, Number, ArithmeticSign)}
+     * {@link ArithmeticOperation#ArithmeticOperation(Number, Number)}
      */
     private final int radix;
+
+    /**
+     * These are the two number with which {@link ArithmeticOperation}-class objects will perform an operation
+     */
+    private final Number number1, number2;
 
     /**
      * This is necessary to fill empty space in the representation of long arithmetic operations
@@ -41,36 +34,25 @@ final class ArithmeticOperation {
     private final static char EMPTY_SYMBOL = ' ';
 
     /**
-     * Constructor which chooses which arithmetic operation needs to perform
+     * Constructor which assign object's fields with input-data
      *
-     * @param number1 is the first number to perform operation
-     * @param number2 is the second number to perform operation
+     * @param number1 is the first number to perform an operation
+     * @param number2 is the second number to perform an operation
      *
      *                <b>Keep in mind that 'number1'- and 'number2'- @params
      *                MUST be represented in the same numeral-system</b>
      *
-     * @param arithmeticSign is the sign which is used for operation, it is the {@link ArithmeticSign}-enum object
      * @throws IllegalArgumentException when incorrect numbers appears while performing an operation
+     * or 'number1'- and 'number2'- @params is represented in the different numeral-system
      */
-    ArithmeticOperation(final Number number1, final Number number2, final ArithmeticSign arithmeticSign) throws IllegalArgumentException {
-        this.radix = number1.getRadix(); // or number2.getRadix();
+    ArithmeticOperation(final Number number1, final Number number2) throws IllegalArgumentException {
 
-        switch (arithmeticSign) {
-            case PLUS:
-                resultNumber = getSumOf(number1, number2);
-                break;
-            case MINUS:
-                resultNumber = getDifferenceOf(number1, number2);
-                break;
-            case MULTI:
-                resultNumber = getProductOf(number1, number2);
-                break;
-            case DIV:
-                resultNumber = getQuotientOf(number1, number2);
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
+        if (number1.getRadix() != number2.getRadix())
+            throw new IllegalArgumentException();
+
+        this.radix = number1.getRadix(); // or number2.getRadix();
+        this.number1 = number1;
+        this.number2 = number2;
     }
 
     /**
@@ -80,12 +62,10 @@ final class ArithmeticOperation {
      * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
      * show the complete solution of a long addition to give the user an understanding of this operation</b>
      *
-     * @param number1 is the first addend-number
-     * @param number2 is the second addend-number
      * @return the sum of the numbers
      * @throws IllegalArgumentException if the result-number turns out incorrect
      */
-    private Number getSumOf(final Number number1, final Number number2) throws IllegalArgumentException {
+    Number getSum() throws IllegalArgumentException {
 
         // If at least one of the numbers equals 0
         if (number1.getSignum() == 0 )
@@ -94,9 +74,9 @@ final class ArithmeticOperation {
             return new Number(number1);
 
         if (number1.getSignum() > 0 && number2.getSignum() < 0)
-            return getDifferenceOf(number1, number2);
+            return getDifference();
         else if (number1.getSignum() < 0 && number2.getSignum() > 0)
-            return getDifferenceOf(number2, number1);
+            return getDifference();
         else { // if 'number1' and 'number2' have the same signum
 
             // 'number2' has the same signum as 'number1', so the result will have the same as its
@@ -180,12 +160,10 @@ final class ArithmeticOperation {
      * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
      * show the complete solution of a long subtraction to give the user an understanding of this operation</b>
      *
-     * @param number1 is the minuend-number
-     * @param number2 is the subtrahend-number
      * @return the difference of the numbers
-     * //@throws IncorrectNumberException if the result-number turns out incorrect
+     * @throws IllegalArgumentException if the result-number turns out incorrect
      */
-    private Number getDifferenceOf(final Number number1, final Number number2) throws IllegalArgumentException {
+    Number getDifference() throws IllegalArgumentException {
 
        /*
         if(!number1.isNegative() && number2.isNegative() && from == FROM_MAIN)
@@ -276,12 +254,10 @@ final class ArithmeticOperation {
      * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
      * show the complete solution of a long multiplication to give the user an understanding of this operation</b>
      *
-     * @param number1 is the multiplier-number
-     * @param number2 is the multiplicand-number
      * @return the product of the numbers
-     * //@throws IncorrectNumberException if the result-number turns out incorrect
+     * @throws IllegalArgumentException if the result-number turns out incorrect
      */
-    private Number getProductOf(final Number number1, final Number number2) throws IllegalArgumentException {
+    Number getProduct() throws IllegalArgumentException {
         try {
             return new Number(radix, "", 0);
         } catch (IncorrectNumberException e) {
@@ -296,27 +272,14 @@ final class ArithmeticOperation {
      * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
      * show the complete solution of a long division to give the user an understanding of this operation</b>
      *
-     * @param number1 is the dividend-number
-     * @param number2 is the divisor-number
      * @return the quotient of the numbers
-     * //@throws IncorrectNumberException if the result-number turns out incorrect
+     * @throws IllegalArgumentException if the result-number turns out incorrect
      */
-    private Number getQuotientOf(final Number number1, final Number number2) throws IllegalArgumentException {
+    Number getQuotient() throws IllegalArgumentException {
         try {
             return new Number(radix, "", 0);
         } catch (IncorrectNumberException e) {
             throw new IllegalArgumentException();
         }
-    }
-
-
-    /* Getters */
-
-    /**
-     * Getter of the {@code resultNumber}-field
-     * @return {@link ArithmeticOperation#resultNumber}
-     */
-    Number getResultNumber() {
-        return resultNumber;
     }
 }

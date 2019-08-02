@@ -1,6 +1,5 @@
 package com.iskandev.rdxcalc.algoengine;
 
-import com.iskandev.rdxcalc.enums.ArithmeticSign;
 import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
 import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
 
@@ -59,7 +58,7 @@ public final class Number /* implements Comparable<Number> */ {
     private final String integerPartRepresent, fractionalPartRepresent;
 
     /**
-     * This is the signum of the number: -1 for negative, 0 for zero, 1 for positive
+     * This is the signum of the number: -1 for negative-signed, 0 for zero-signed, 1 for positive-signed numbers
      *
      * Gets value from the constructors:
      * {@link Number#Number(int, String, int)}
@@ -68,7 +67,7 @@ public final class Number /* implements Comparable<Number> */ {
      * Getting access to this field from the outside provides getter:
      * {@link Number#getSignum()} ()}
      */
-    private final int signum;
+    private int signum;
 
     /**
      * Constructor that gets a number using its specific properties
@@ -81,38 +80,18 @@ public final class Number /* implements Comparable<Number> */ {
      */
     public Number(final int radix, final String stringRepresent, final int signum) throws IncorrectNumberException {
 
-        /*
-        This var is necessary to correct an input string-representation
-        and then assign a right value to 'fullRepresent'-field
-        */
-        StringBuilder tmpFullRepresent;
-
-        /*
-        This var is necessary to make a right choice of the number's sign
-        and then assign a right value to 'signum'-field
-        */
-        int tmpSignum = signum;
+        this.signum = signum;
 
         try {
-            this.radix = checkCorrectness(radix);
-            tmpFullRepresent = checkCorrectness(stringRepresent);
+            this.radix = checkRadixCorrectness(radix); // throws IllegalArgumentException if it's incorrect
+            this.fullRepresent = getCorrectedRepresent(stringRepresent); // also can make 'signum'-fields negative(-1)
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
 
-        // If number has minus at the beginning - it has negative signum, delete minus
-        if (tmpFullRepresent.charAt(0) == ArithmeticSign.MINUS.getChar()) {
-            tmpSignum = -1;
-            tmpFullRepresent.deleteCharAt(0);
-        }
-
-        fullRepresent = clearInsignificantZeros(tmpFullRepresent.indexOf("."), tmpFullRepresent);
-
-        // But if it equals ZERO - it has zero signum
+        // It it's equal ZERO - it has zero signum
         if (fullRepresent.equals("0"))
-            tmpSignum = 0;
-
-        this.signum = tmpSignum; // assign right final value of number's signum to 'signum'-field
+            this.signum = 0;
 
         final int DOT_INDEX = fullRepresent.indexOf(".");
 
@@ -151,7 +130,7 @@ public final class Number /* implements Comparable<Number> */ {
      */
     public Number convertTo(final int radix) throws IncorrectNumberException {
         try {
-            return new Converter(this, checkCorrectness(radix)).getResultNumber();
+            return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
@@ -170,7 +149,7 @@ public final class Number /* implements Comparable<Number> */ {
     public Number add(final Number addendNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
         try {
-            return new ArithmeticOperation(this, addendNumber, ArithmeticSign.PLUS).getResultNumber();
+            return new ArithmeticOperation(this, addendNumber).getSum();
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
@@ -189,7 +168,7 @@ public final class Number /* implements Comparable<Number> */ {
     public Number subtract(final Number subtrahendNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
         try {
-            return new ArithmeticOperation(this, subtrahendNumber, ArithmeticSign.MINUS).getResultNumber();
+            return new ArithmeticOperation(this, subtrahendNumber).getDifference();
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
@@ -208,7 +187,7 @@ public final class Number /* implements Comparable<Number> */ {
     public Number multiply(final Number multiplicandNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
         try {
-            return new ArithmeticOperation(this, multiplicandNumber, ArithmeticSign.MULTI).getResultNumber();
+            return new ArithmeticOperation(this, multiplicandNumber).getProduct();
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
@@ -227,55 +206,11 @@ public final class Number /* implements Comparable<Number> */ {
     public Number divide(final Number divisorNumber) throws IncorrectNumberException {
         // To convert both of the numbers to the same numeral-system
         try {
-            return new ArithmeticOperation(this, divisorNumber, ArithmeticSign.DIV).getResultNumber();
+            return new ArithmeticOperation(this, divisorNumber).getQuotient();
         } catch (IllegalArgumentException e) {
             throw new IncorrectNumberException();
         }
     }
-
-    /*
-    @Override
-    public int compareTo(final Number comparableNumber) throws IllegalArgumentException {
-        final int LESS = -1, MORE = 1;
-
-        if (!this.isNegative() && comparableNumber.isNegative())
-            return MORE;
-        if (this.isNegative() && !comparableNumber.isNegative())
-            return LESS;
-        // else anyway this Number and the 'comparableNumber' have the same 'negative'
-        if (this.getIntegerPartRepresent().length() > comparableNumber.getIntegerPartRepresent().length()) {
-            if (!this.isNegative())
-                return MORE;
-            else
-                return LESS;
-        }
-        else if (this.getIntegerPartRepresent().length() < comparableNumber.getIntegerPartRepresent().length()) {
-            if (!this.isNegative())
-                return LESS;
-            else
-                return MORE;
-        } else {
-            try {
-                BigDecimal thisNum10;
-                BigDecimal compNum10;
-
-                if (this.isNegative()) { // in this way 'comparableNumber' is negative too
-                    thisNum10 = new BigDecimal(ArithmeticSign.MINUS.getString() + this.convertTo(10).getFullRepresent().toString());
-                    compNum10 = new BigDecimal(ArithmeticSign.MINUS.getString() + comparableNumber.convertTo(10).getFullRepresent().toString());
-                } else {
-                    thisNum10 = new BigDecimal(this.convertTo(10).getFullRepresent().toString());
-                    compNum10 = new BigDecimal(comparableNumber.convertTo(10).getFullRepresent().toString());
-                }
-
-                return thisNum10.compareTo(compNum10); // 1, 0, -1
-
-            } catch (IncorrectNumberException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException();
-            }
-        }
-    }
-     */
 
     /**
      * This method checks the current number if it is too large to exist in the program
@@ -295,29 +230,62 @@ public final class Number /* implements Comparable<Number> */ {
     /**
      * This method checks correctness of the radix
      *
-     * @param radix is the radix of the numeral-system
+     * @param initRadix is the radix of the numeral-system
      * @return just 'radix'-@param value; if it is correct
      * @throws IllegalArgumentException if radix is incorrect
      */
-    private int checkCorrectness (final int radix) throws IllegalArgumentException {
-        if (radix < 2 || radix > 36)
+    private int checkRadixCorrectness (final int initRadix) throws IllegalArgumentException {
+        if (initRadix < 2 || initRadix > 36)
             throw new IllegalArgumentException();
         else
-            return radix;
+            return initRadix;
+    }
+
+    /**
+     * This method gets the initial string-representation of the number and returns the corrected one from it
+     * It checks init correctness and clear insignificant symbols
+     *
+     * As well, this method can change the value of {@link Number#signum}-field to negative(-1)
+     * if number has minus at the beginning
+     *
+     * It also uses {@link Number#checkCorrectnessOf(String)} and
+     * {@link Number#getWithoutInsignificantSymbols(StringBuilder)} methods
+     *
+     * @param initStringRepresent is the initial string-representation of the number
+     * @return corrected string-representation of the number
+     */
+    private String getCorrectedRepresent(final String initStringRepresent) throws IllegalArgumentException {
+
+        // Throws IllegalArgumentException if it's incorrect
+        StringBuilder correctableRepresent = checkCorrectnessOf(initStringRepresent);
+
+        // If number has minus at the beginning - it has negative signum, delete minus
+        if (correctableRepresent.charAt(0) == '-') {
+            this.signum = -1;
+            correctableRepresent.deleteCharAt(0);
+        }
+
+        return getWithoutInsignificantSymbols(correctableRepresent).toString();
     }
 
     /**
      * This method checks string-representation of the number correctness
      *
-     * @param stringRepresent is string-representation of the number
-     * @return new StringBuilder object which representation is the 'str'-@param's representation; if it's correct
+     * Used only in the method {@link Number#getCorrectedRepresent(String)}
+     *
+     * @param stringRepresent is the string-representation of the number
+     * @return new StringBuilder object which representation is the 'str'-@param's; if it's correct
      * @throws IllegalArgumentException if it's not correct
      */
-    private StringBuilder checkCorrectness (final String stringRepresent) throws IllegalArgumentException {
+    private StringBuilder checkCorrectnessOf (final String stringRepresent) throws IllegalArgumentException {
+
         if (stringRepresent != null && !stringRepresent.isEmpty()) {
 
+            if (stringRepresent.equals("-"))
+                throw new IllegalArgumentException();
+
             // Check if the string-representation of the number matches the regex-pattern
-            if (!Pattern.compile("-?[A-Z\\d]*.?[A-Z\\d]*").matcher(stringRepresent).matches())
+            if (!Pattern.matches("^-?[A-Z\\d]*\\.?[A-Z\\d]*$", stringRepresent))
                 throw new IllegalArgumentException("regex");
 
             // Check if at least (one digit of the number) >= number's radix
@@ -326,52 +294,55 @@ public final class Number /* implements Comparable<Number> */ {
                 ignore if it's a dot('.') or minus('-') symbol;
                 compare with number's radix if it's a digit or a letter symbol
                  */
-                if (stringRepresent.charAt(i) != ArithmeticSign.MINUS.getChar() && stringRepresent.charAt(i) != '.' &&
+                if (stringRepresent.charAt(i) != '-' && stringRepresent.charAt(i) != '.' &&
                         Character.getNumericValue(stringRepresent.charAt(i)) >= radix)
                     throw new IllegalArgumentException();
             }
 
             return new StringBuilder(stringRepresent);
         }
+
         else // if input string-representation is empty
             throw new IllegalArgumentException();
     }
 
     /**
-     * This method clears insignificant zeros at the beginning of the number's string-representation,
-     * <b>in the integer part!</b>
+     * This method gets number's string-representation and returns <b>cleaned</b> number's string-representation
+     * without insignificant symbols(insignificant zeros and dot)
      *
-     * And clear trailing zeros at the end of the number's string-representation,
-     * <b>in the fractional part!</b>
+     * Used only in the method {@link Number#getCorrectedRepresent(String)}
      *
-     * @param dotIndex is index of dot in the full string-representation
-     *                 can be either any positive integer value
-     *                 or -1 if number doesn't have fractional-part (therefore doesn't have dot too)
+     * @param stringRepresent is the number's string-representation
+     * @return cleaned number's string-representation
      */
-    private String clearInsignificantZeros(final int dotIndex, final StringBuilder stringRepresent) {
+    private StringBuilder getWithoutInsignificantSymbols(final StringBuilder stringRepresent) {
 
-        StringBuilder tmpStringRepresent = new StringBuilder(stringRepresent);
+        final int DOT_INDEX = stringRepresent.indexOf(".");
+
+        StringBuilder correctableRepresent = new StringBuilder(stringRepresent);
 
         // Clearing at the end of the number's fractional-part
-        if (dotIndex != -1) { // if number has the fractional-part
-            while (tmpStringRepresent.charAt(tmpStringRepresent.length() - 1) == '0')
-                tmpStringRepresent.deleteCharAt(tmpStringRepresent.length() - 1);
+        if (DOT_INDEX != -1) {
 
-            if (tmpStringRepresent.length() - 1 == dotIndex)
-                tmpStringRepresent.deleteCharAt(tmpStringRepresent.length() - 1);
+            while (correctableRepresent.charAt(correctableRepresent.length() - 1) == '0')
+                correctableRepresent.deleteCharAt(correctableRepresent.length() - 1);
+
+            if (correctableRepresent.length() - 1 == DOT_INDEX)
+                correctableRepresent.deleteCharAt(correctableRepresent.length() - 1);
         }
 
         // Clearing at the beginning of the number's integer-part
-        while (tmpStringRepresent.charAt(0) == '0' && (tmpStringRepresent.length() > 0 && tmpStringRepresent.charAt(1) != '.'))
-            tmpStringRepresent.deleteCharAt(0);
-        
-        if (tmpStringRepresent.charAt(0) == '.')
-            tmpStringRepresent.insert(0, '0');
-        
-        if (tmpStringRepresent.toString().isEmpty())
-            tmpStringRepresent.append('0');
+        try {
+            while (correctableRepresent.charAt(0) == '0' && correctableRepresent.charAt(1) != '.')
+                correctableRepresent.deleteCharAt(0);
+        } catch (StringIndexOutOfBoundsException e) {
+            return new StringBuilder("0");
+        }
 
-        return tmpStringRepresent.toString();
+        if (correctableRepresent.charAt(0) == '.')
+            correctableRepresent.insert(0, '0');
+
+        return correctableRepresent;
     }
 
 
