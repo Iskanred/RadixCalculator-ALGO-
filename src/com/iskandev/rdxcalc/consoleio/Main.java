@@ -1,6 +1,7 @@
 package com.iskandev.rdxcalc.consoleio;
 
 import com.iskandev.rdxcalc.algoengine.Number;
+import com.iskandev.rdxcalc.enums.ArithmeticSign;
 import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
 
 import java.util.Scanner;
@@ -11,22 +12,31 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final String str1 = in.next();
-        final int radix1 = in.nextInt();
-        //final int resultRadix1 = in.nextInt();
-
-        final String str2 = in.next();
-        final int radix2 = in.nextInt();
-        //final int resultRadix2 = in.nextInt();
-
         try {
-            Number n1 = new Number(radix1, str1);
-            Number n2 = new Number(radix2, str2);
+            final Number n1 = new Number(in.nextInt(), in.next());
 
-            //System.out.println((n1.getSignum() == -1 ? "-" : "") + n1.getFullRepresent() + " " + n1.getRadix());
-            //System.out.println((n2.getSignum() == -1 ? "-" : "") + n2.getFullRepresent() + " " + n2.getRadix());
+            final char op = in.next().charAt(0);
 
-            Number nRes = new Number(n1.add(n2));
+            final Number n2 = new Number(in.nextInt(), in.next());
+
+            final Number nRes;
+
+            switch (op) {
+                case '+' :
+                    nRes = n1.add(n2);
+                    break;
+                case '-' :
+                    nRes = n1.subtract(n2);
+                    break;
+                case '×' :
+                    nRes = n1.multiply(n2);
+                    break;
+                case '÷' :
+                    nRes = n1.divide(n2);
+                    break;
+                default:
+                    nRes = new Number(0, null);
+            }
 
             System.out.println(nRes.getSignedMinusRepresent() + " " + nRes.getRadix());
 

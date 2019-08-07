@@ -4,24 +4,26 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
-final class Converter {
 
-    private final Number resultNumber;
+final class Converter {
 
     @Deprecated
     static final int MAX_ROUNDING_AMOUNT = 10;
 
 
+    private final Number resultNumber;
+
     Converter(final Number convertNumber, final int resultRadix) {
 
         // Used for the fast-conversion
-        int exponentRadix = logInt(Math.min(convertNumber.getRadix(), resultRadix), Math.min(convertNumber.getRadix(), resultRadix));
+        final int EXPONENT_RADIX = logInt(Math.min(convertNumber.getRadix(), resultRadix),
+                Math.max(convertNumber.getRadix(), resultRadix));
 
         if (convertNumber.getRadix() == resultRadix || convertNumber.getUnsignedRepresent().toString().equals("0") ||
                 convertNumber.getUnsignedRepresent().toString().equals("1"))
             resultNumber = new Number(convertNumber);
-        else if (exponentRadix != -1)
-            resultNumber = getFastConversion(convertNumber, resultRadix, exponentRadix);
+        else if (EXPONENT_RADIX != -1)
+            resultNumber = getFastConversion(convertNumber, resultRadix, EXPONENT_RADIX);
         else if (resultRadix == 10)
             resultNumber = getConversionToDecimal(convertNumber);
         else if (convertNumber.getRadix() == 10)
@@ -73,7 +75,7 @@ final class Converter {
         // Convert integer-part, and if number has no fractional-part return 'resultStr'
         final BigInteger bigIntRadix = new BigInteger(Integer.toString(resultRadix));
         BigInteger intPart = new BigInteger(number.getIntegerPartRepresent());
-        StringBuilder resultStr = new StringBuilder();
+        final StringBuilder resultStr = new StringBuilder();
 
         while (intPart.compareTo(BigInteger.ZERO) > 0) {
             final BigInteger divisionResult = intPart.divide(bigIntRadix);
@@ -87,21 +89,21 @@ final class Converter {
 
         // Convert fractional-part and add the result of converting to 'resultStr'
         if (number.getFractionalPartRepresent().length() != 0) {
-            final BigDecimal bigDecRadix = new BigDecimal(bigIntRadix).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.UNNECESSARY);
-            BigDecimal decPart = new BigDecimal("0." + number.getFractionalPartRepresent()).
+            final BigDecimal bigFractRadix = new BigDecimal(bigIntRadix).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.UNNECESSARY);
+            BigDecimal fractPart = new BigDecimal("0." + number.getFractionalPartRepresent()).
                     setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
-            StringBuilder resultStrDec = new StringBuilder();
+            final StringBuilder resultStrFract = new StringBuilder();
 
-            while (resultStrDec.length() < MAX_ROUNDING_AMOUNT) {
-                final BigDecimal multiplicationResult = decPart.multiply(bigDecRadix);
+            while (resultStrFract.length() < MAX_ROUNDING_AMOUNT) {
+                final BigDecimal multiplicationResult = fractPart.multiply(bigFractRadix);
                 final String intPartResult = multiplicationResult.toBigInteger().toString(); // getting integer-part
                 final char charDigit = getDigitRadixRepresent(Integer.parseInt(intPartResult));
                 final String decPartResult = getFractionalPartFrom(multiplicationResult); // getting fractional-part WITHOUT "0."-part
 
-                resultStrDec.append(charDigit);
-                decPart = new BigDecimal("0." + decPartResult); // getting fractional-part WITH "0."-part
+                resultStrFract.append(charDigit);
+                fractPart = new BigDecimal("0." + decPartResult); // getting fractional-part WITH "0."-part
             }
-            resultStr.append('.').append(resultStrDec);
+            resultStr.append('.').append(resultStrFract);
         }
 
         return new Number(resultRadix, resultStr.toString(), number.getSignum());

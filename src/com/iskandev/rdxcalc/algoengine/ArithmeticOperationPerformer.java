@@ -1,14 +1,16 @@
 package com.iskandev.rdxcalc.algoengine;
 
-final class ArithmeticOperation {
 
-    private final int radix;
-
-    private final Number number1, number2;
+final class ArithmeticOperationPerformer {
 
     private final static char EMPTY_SYMBOL = ' ';
 
-    ArithmeticOperation(final Number number1, final Number number2) {
+
+    private final int radix;
+
+    private Number number1, number2;
+
+    ArithmeticOperationPerformer(final Number number1, final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
             throw new IllegalArgumentException("Impossible to perform an operation! Radix of the first number doesn't equal radix of the second number.");
@@ -20,29 +22,32 @@ final class ArithmeticOperation {
 
     Number getSum() {
 
-        // If at least one of the numbers equals 0
-        if (number1.getSignum() == 0 )
+        // If at least one of the number equals 0
+        if (number1.getSignum() == 0)
             return new Number(number2);
-        else if (number2.getSignum() == 0)
+        if (number2.getSignum() == 0)
             return new Number(number1);
 
-        if (number1.getSignum() > 0 && number2.getSignum() < 0)
+        // If numbers have different signums (not zero)
+        if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0) {
+            number2 = number2.reverseSign();
             return getDifference();
-        else if (number1.getSignum() < 0 && number2.getSignum() > 0)
-            return getDifference();
-        else { // if 'number1' and 'number2' have the same signum
+        }
+
+        // If numbers have the same signum (not zero)
+        else {
 
             // 'number2' has the same signum as 'number1', so the result will have the same as its
-            int signumOfResult = number1.getSignum();
+            final int RESULT_SIGNUM = number1.getSignum();
 
-            StringBuilder num1IntStr = new StringBuilder(number1.getIntegerPartRepresent()),
+            final StringBuilder num1IntStr = new StringBuilder(number1.getIntegerPartRepresent()),
                     num2IntStr = new StringBuilder(number2.getIntegerPartRepresent());
-            StringBuilder num1FractStr = new StringBuilder(number1.getFractionalPartRepresent()),
+            final StringBuilder num1FractStr = new StringBuilder(number1.getFractionalPartRepresent()),
                     num2FractStr = new StringBuilder(number2.getFractionalPartRepresent());
-            String num1FullStr, num2FullStr;
+            final String num1FullStr, num2FullStr;
 
             // Will be inverted at the right, then(before return) it will become normalized (at the left)
-            StringBuilder resultStr = new StringBuilder();
+            final StringBuilder resultStr = new StringBuilder();
 
             /*
              To catch overflow when sum of the digits more than max-digit in the numeral system
@@ -78,8 +83,11 @@ final class ArithmeticOperation {
                     continue;
                 }
 
-                int digitOfNum1 = (num1FullStr.charAt(i) != EMPTY_SYMBOL) ? Character.getNumericValue(num1FullStr.charAt(i)) : 0;
-                int digitOfNum2 = (num2FullStr.charAt(i) != EMPTY_SYMBOL) ? Character.getNumericValue(num2FullStr.charAt(i)) : 0;
+                final int digitOfNum1 = (num1FullStr.charAt(i) != EMPTY_SYMBOL) ?
+                        Character.getNumericValue(num1FullStr.charAt(i)) : 0;
+                final int digitOfNum2 = (num2FullStr.charAt(i) != EMPTY_SYMBOL) ?
+                        Character.getNumericValue(num2FullStr.charAt(i)) : 0;
+
                 int digitOfResult = digitOfNum1 + digitOfNum2;
 
                 if (adder)
@@ -98,24 +106,30 @@ final class ArithmeticOperation {
 
             resultStr.reverse(); // invert and normalize the number to read at the left
 
-            return new Number(radix, resultStr.toString(), signumOfResult);
+            return new Number(radix, resultStr.toString(), RESULT_SIGNUM);
         }
     }
 
     Number getDifference()  {
 
-       /*
-        if(!number1.isNegative() && number2.isNegative() && from == FROM_MAIN)
-            return new StringBuilder(sum(FROM_SUB));
+        // If at least one of the number equals 0
+        if (number1.getSignum() == 0)
+            return new Number(number2.reverseSign());
+        if (number2.getSignum() == 0)
+            return new Number(number1);
 
-        else if(number1.isNegative() && !number2.isNegative() && from == FROM_MAIN)
-            return new StringBuilder(Character.toString(MainActivity.MINUS) + sum(FROM_SUB));
-
-        else if(number1.isNegative() && number2.isNegative() && from == FROM_MAIN) {
-            swapNumbers();
-            return sub(FROM_SUB);
+        // If numbers have different signums (not zero)
+        if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0) {
+            number2 = number2.reverseSign();
+            return getSum();
         }
 
+        // If numbers have the same signum (not zero)
+        else {
+            return new Number(radix, null, 0);
+        }
+
+       /*
         else {
             StringBuilder maxStr_dec, maxStr_int, minStr_dec, minStr_int, maxStr, minStr,
                     result = new StringBuilder();
@@ -179,8 +193,6 @@ final class ArithmeticOperation {
         }
 
         */
-
-       return new Number(radix, "", 0);
     }
 
     Number getProduct() {

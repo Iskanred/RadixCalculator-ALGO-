@@ -4,6 +4,7 @@ import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
 
 import java.util.regex.Pattern;
 
+
 public final class Number {
 
     private final int radix;
@@ -18,15 +19,6 @@ public final class Number {
     public Number(final int radix, final String stringRepresent) throws TooLargeNumberException {
         this(radix, stringRepresent, 1);
         checkTooLarge();
-    }
-
-    public Number(final Number number) {
-        this.radix = number.getRadix();
-        this.unsignedRepresent = number.getUnsignedRepresent();
-        this.signedMinusRepresent = number.getSignedMinusRepresent();
-        this.integerPartRepresent = number.getIntegerPartRepresent();
-        this.fractionalPartRepresent = number.getFractionalPartRepresent();
-        this.signum = number.getSignum();
     }
 
     Number(final int radix, final String stringRepresent, final int signum) {
@@ -56,28 +48,41 @@ public final class Number {
         }
     }
 
+    Number(final Number number) {
+        this.radix = number.getRadix();
+        this.unsignedRepresent = number.getUnsignedRepresent();
+        this.signedMinusRepresent = number.getSignedMinusRepresent();
+        this.integerPartRepresent = number.getIntegerPartRepresent();
+        this.fractionalPartRepresent = number.getFractionalPartRepresent();
+        this.signum = number.getSignum();
+    }
+
     public Number convertTo(final int radix) {
         return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
     }
 
     public Number add(final Number addendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperation(this, addendNumber).getSum().checkTooLarge();
+        return new ArithmeticOperationPerformer(this, addendNumber).getSum().checkTooLarge();
     }
 
     public Number subtract(final Number subtrahendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperation(this, subtrahendNumber).getDifference().checkTooLarge();
+        return new ArithmeticOperationPerformer(this, subtrahendNumber).getDifference().checkTooLarge();
     }
 
     public Number multiply(final Number multiplicandNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperation(this, multiplicandNumber).getProduct().checkTooLarge();
+        return new ArithmeticOperationPerformer(this, multiplicandNumber).getProduct().checkTooLarge();
     }
 
     public Number divide(final Number divisorNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperation(this, divisorNumber).getQuotient().checkTooLarge();
+        return new ArithmeticOperationPerformer(this, divisorNumber).getQuotient().checkTooLarge();
+    }
+
+    Number reverseSign() {
+        return new Number(radix, unsignedRepresent, -signum);
     }
 
     private int checkRadixCorrectness (final int radix) {
@@ -89,7 +94,7 @@ public final class Number {
 
     private String getCorrectedRepresent(final String initStringRepresent) {
 
-        StringBuilder correctableRepresent = checkRepresentationCorrectness(initStringRepresent);
+        final StringBuilder correctableRepresent = checkRepresentationCorrectness(initStringRepresent);
 
         // If number has minus at the beginning - it has negative signum, delete minus
         if (correctableRepresent.charAt(0) == '-') {
@@ -135,8 +140,7 @@ public final class Number {
     private StringBuilder getWithoutInsignificantSymbols(final StringBuilder stringRepresent) {
 
         final int DECPOINT_INDEX = stringRepresent.indexOf(".");
-
-        StringBuilder correctableRepresent = new StringBuilder(stringRepresent);
+        final StringBuilder correctableRepresent = new StringBuilder(stringRepresent);
 
         // Clearing the trailing zeros and insignificant point at the end of a number's representation
         if (DECPOINT_INDEX != -1) {
