@@ -1,20 +1,11 @@
 package com.iskandev.rdxcalc.exceptions;
 
-/**
- * Class {@code TooLargeNumberException} is the Exception class
- *
- * If a number is too large to exist in the program
- * {@link com.iskandev.rdxcalc.algoengine.Number}-class objects throw the
- * {@code TooLargeNumberException}-class exceptions
- *
- * @see NumberException
- */
-public final class TooLargeNumberException extends NumberException {
+public final class TooLargeNumberException extends Exception {
 
-    /**
-     * Constructor that overrides {@link NumberException#message}
-     */
-    public TooLargeNumberException() {
-        super.message = "TOO LARGE";
+    private final String message = "!TOO LARGE NUMBER!";
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

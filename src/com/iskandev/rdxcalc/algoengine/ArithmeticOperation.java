@@ -1,71 +1,24 @@
 package com.iskandev.rdxcalc.algoengine;
 
-import com.iskandev.rdxcalc.exceptions.IncorrectNumberException;
-
-/**
- * Class {@code ArithmeticOperation} is the tool for the performing
- * primitive mathematical <i>arithmetic operation</i>
- * (addition or subtraction or multiplication or division) with pair of <b>numbers</b>
- *
- * Class works with {@link Number}-class objects
- *
- * <b>Objects of {@code ArithmeticOperation}-class are Immutable!</b>
- */
 final class ArithmeticOperation {
 
-    /**
-     * This is the radix of the numeral-system in which both of numbers are represented for performing
-     * an arithmetic operation
-     *
-     * Gets value from the constructor:
-     * {@link ArithmeticOperation#ArithmeticOperation(Number, Number)}
-     */
     private final int radix;
 
-    /**
-     * These are the two number with which {@link ArithmeticOperation}-class objects will perform an operation
-     */
     private final Number number1, number2;
 
-    /**
-     * This is necessary to fill empty space in the representation of long arithmetic operations
-     * {@value} ' ' is the symbol that can be typed if press ALT+255 in Windows Operating System
-     */
     private final static char EMPTY_SYMBOL = ' ';
 
-    /**
-     * Constructor which assign object's fields with input-data
-     *
-     * @param number1 is the first number to perform an operation
-     * @param number2 is the second number to perform an operation
-     *
-     *                <b>Keep in mind that 'number1'- and 'number2'- @params
-     *                MUST be represented in the same numeral-system</b>
-     *
-     * @throws IllegalArgumentException when incorrect numbers appears while performing an operation
-     * or 'number1'- and 'number2'- @params is represented in the different numeral-system
-     */
-    ArithmeticOperation(final Number number1, final Number number2) throws IllegalArgumentException {
+    ArithmeticOperation(final Number number1, final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Impossible to perform an operation! Radix of the first number doesn't equal radix of the second number.");
 
         this.radix = number1.getRadix(); // or number2.getRadix();
         this.number1 = number1;
         this.number2 = number2;
     }
 
-    /**
-     * This method perform <b>long addition</b> between the two numbers
-     * It performs the long addition like a human to show the complete solution of a getting the sum later
-     *
-     * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
-     * show the complete solution of a long addition to give the user an understanding of this operation</b>
-     *
-     * @return the sum of the numbers
-     * @throws IllegalArgumentException if the result-number turns out incorrect
-     */
-    Number getSum() throws IllegalArgumentException {
+    Number getSum() {
 
         // If at least one of the numbers equals 0
         if (number1.getSignum() == 0 )
@@ -97,7 +50,7 @@ final class ArithmeticOperation {
              */
             boolean adder = false;
 
-            // if at least one of the numbers has a fraction-part - add a dot to the fraction beginning
+            // if at least one of the numbers has a fraction-part - add a decimal point to the fraction beginning
             if (num1FractStr.length() != 0 || num2FractStr.length() != 0) {
                 num1FractStr.insert(0, '.');
                 num2FractStr.insert(0, '.');
@@ -145,25 +98,11 @@ final class ArithmeticOperation {
 
             resultStr.reverse(); // invert and normalize the number to read at the left
 
-            try {
-                return new Number(radix, resultStr.toString(), signumOfResult);
-            } catch (IncorrectNumberException e) {
-                throw new IllegalArgumentException();
-            }
+            return new Number(radix, resultStr.toString(), signumOfResult);
         }
     }
 
-    /**
-     * This method perform <b>long subtraction</b> between the two numbers
-     * It performs the long subtraction like a human to show the complete solution of a getting the difference later
-     *
-     * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
-     * show the complete solution of a long subtraction to give the user an understanding of this operation</b>
-     *
-     * @return the difference of the numbers
-     * @throws IllegalArgumentException if the result-number turns out incorrect
-     */
-    Number getDifference() throws IllegalArgumentException {
+    Number getDifference()  {
 
        /*
         if(!number1.isNegative() && number2.isNegative() && from == FROM_MAIN)
@@ -240,46 +179,15 @@ final class ArithmeticOperation {
         }
 
         */
-        try {
-            return new Number(radix, "", 0);
-        } catch (IncorrectNumberException e) {
-            throw new IllegalArgumentException();
-        }
+
+       return new Number(radix, "", 0);
     }
 
-    /**
-     * This method perform <b>long multiplication</b> between the two numbers
-     * It performs the long multiplication like a human to show the complete solution of a getting the product later
-     *
-     * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
-     * show the complete solution of a long multiplication to give the user an understanding of this operation</b>
-     *
-     * @return the product of the numbers
-     * @throws IllegalArgumentException if the result-number turns out incorrect
-     */
-    Number getProduct() throws IllegalArgumentException {
-        try {
-            return new Number(radix, "", 0);
-        } catch (IncorrectNumberException e) {
-            throw new IllegalArgumentException();
-        }
+    Number getProduct() {
+        return new Number(radix, "", 0);
     }
 
-    /**
-     * This method perform <b>long division</b> between the two numbers
-     * It performs the long division like a human to show the complete solution of a getting the quotient later
-     *
-     * <b>Keep in mind any thing that may seem unnecessary in this method, most likely it is necessary to
-     * show the complete solution of a long division to give the user an understanding of this operation</b>
-     *
-     * @return the quotient of the numbers
-     * @throws IllegalArgumentException if the result-number turns out incorrect
-     */
-    Number getQuotient() throws IllegalArgumentException {
-        try {
-            return new Number(radix, "", 0);
-        } catch (IncorrectNumberException e) {
-            throw new IllegalArgumentException();
-        }
+    Number getQuotient() {
+        return new Number(radix, "", 0);
     }
 }
