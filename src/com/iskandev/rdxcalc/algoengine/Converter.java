@@ -42,6 +42,7 @@ final class Converter {
     }
 
     @Deprecated
+    @NotNull
     private Number getFastConversion (@NotNull final Number number, final int resultRadix, final int exponent) {
         if (number.getRadix() < resultRadix) {
 
@@ -52,6 +53,7 @@ final class Converter {
         return getConversionFromDecimal(getConversionToDecimal(number), resultRadix);
     }
 
+    @NotNull
     private Number getConversionToDecimal(@NotNull final Number number) {
         BigDecimal result = BigDecimal.valueOf(0).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
 
@@ -72,6 +74,7 @@ final class Converter {
         return new Number(10, result.toPlainString(), number.getSignum());
     }
 
+    @NotNull
     private Number getConversionFromDecimal(@NotNull final Number number, final int resultRadix) {
 
         // Convert integer-part, and if number has no fractional-part return 'resultStr'
@@ -126,6 +129,7 @@ final class Converter {
         return result;
     }
 
+    @NotNull
     private String getFractionalPartFrom(@NotNull final BigDecimal bigFractional) {
         /*
         Gets fractional-part with "0."-part using BigDecimal methods
@@ -138,6 +142,7 @@ final class Converter {
 
     /* Getters */
 
+    @NotNull
     Number getResultNumber() {
         return resultNumber;
     }

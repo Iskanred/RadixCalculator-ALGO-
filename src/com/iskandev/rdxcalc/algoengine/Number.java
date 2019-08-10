@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
 
-public final class Number implements Comparable<Number>{
+public final class Number implements Comparable<Number> {
 
     private final int radix;
 
@@ -60,25 +60,30 @@ public final class Number implements Comparable<Number>{
         this.signum = number.getSignum();
     }
 
+    @NotNull
     public Number convertTo(final int radix) {
         return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
     }
 
+    @NotNull
     public Number add(@NotNull final Number addendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, addendNumber).getSum().checkTooLarge();
     }
 
+    @NotNull
     public Number subtract(@NotNull final Number subtrahendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, subtrahendNumber).getDifference().checkTooLarge();
     }
 
+    @NotNull
     public Number multiply(@NotNull final Number multiplicandNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, multiplicandNumber).getProduct().checkTooLarge();
     }
 
+    @NotNull
     public Number divide(@NotNull final Number divisorNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, divisorNumber).getQuotient().checkTooLarge();
@@ -100,10 +105,12 @@ public final class Number implements Comparable<Number>{
         }
     }
 
+    @NotNull
     Number negate() {
         return new Number(radix, unsignedRepresent, -signum);
     }
 
+    @NotNull
     private Number abs() {
         return (signum >= 0 ? this : this.negate());
     }
@@ -115,6 +122,7 @@ public final class Number implements Comparable<Number>{
             throw new IllegalArgumentException("Radix of number is incorrect.");
     }
 
+    @NotNull
     private String getCorrectedRepresent(@Nullable final String initStringRepresent) {
 
         final StringBuilder correctableRepresent = checkRepresentationCorrectness(initStringRepresent);
@@ -128,6 +136,7 @@ public final class Number implements Comparable<Number>{
         return getWithoutInsignificantSymbols(correctableRepresent).toString();
     }
 
+    @NotNull
     private StringBuilder checkRepresentationCorrectness (@Nullable final String stringRepresent) {
 
         if (stringRepresent == null)
@@ -160,6 +169,7 @@ public final class Number implements Comparable<Number>{
         }
     }
 
+    @NotNull
     private StringBuilder getWithoutInsignificantSymbols(@NotNull final StringBuilder stringRepresent) {
 
         final int DECPOINT_INDEX = stringRepresent.indexOf(".");
@@ -189,6 +199,7 @@ public final class Number implements Comparable<Number>{
         return correctableRepresent;
     }
 
+    @NotNull
     private Number checkTooLarge() throws TooLargeNumberException {
         final Number MAX_NUMBER = new Number(10, "9999999999999999999999999.9999999999", 1);
 
@@ -205,6 +216,7 @@ public final class Number implements Comparable<Number>{
         return radix;
     }
 
+    @NotNull
     public String getSignedMinusRepresent() {
         return signedMinusRepresent;
     }
@@ -213,14 +225,17 @@ public final class Number implements Comparable<Number>{
         return signum;
     }
 
+    @NotNull
     String getUnsignedRepresent() {
         return unsignedRepresent;
     }
 
+    @NotNull
     String getIntegerPartRepresent() {
         return integerPartRepresent;
     }
 
+    @NotNull
     String getFractionalPartRepresent() {
         return fractionalPartRepresent;
     }

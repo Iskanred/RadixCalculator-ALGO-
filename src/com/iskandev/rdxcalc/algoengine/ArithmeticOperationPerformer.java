@@ -21,6 +21,7 @@ final class ArithmeticOperationPerformer {
         this.number2 = number2;
     }
 
+    @NotNull
     Number getSum() {
 
         // If at least one of the number equals 0
@@ -111,6 +112,7 @@ final class ArithmeticOperationPerformer {
         }
     }
 
+    @NotNull
     Number getDifference()  {
 
         // If at least one of the number equals 0
@@ -140,7 +142,7 @@ final class ArithmeticOperationPerformer {
             }
 
 
-            return new Number(0, "", 0);
+            return null;
         }
 
        /*
@@ -209,11 +211,13 @@ final class ArithmeticOperationPerformer {
         */
     }
 
+    @NotNull
     Number getProduct() {
-        return new Number(radix, "", 0);
+        return null;
     }
 
+    @NotNull
     Number getQuotient() {
-        return new Number(radix, "", 0);
+        return null;
     }
 }
