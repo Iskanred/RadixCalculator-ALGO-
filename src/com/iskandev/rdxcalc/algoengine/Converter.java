@@ -1,5 +1,7 @@
 package com.iskandev.rdxcalc.algoengine;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -13,14 +15,14 @@ final class Converter {
 
     private final Number resultNumber;
 
-    Converter(final Number convertNumber, final int resultRadix) {
+    Converter(@NotNull final Number convertNumber, final int resultRadix) {
 
         // Used for the fast-conversion
         final int EXPONENT_RADIX = logInt(Math.min(convertNumber.getRadix(), resultRadix),
                 Math.max(convertNumber.getRadix(), resultRadix));
 
-        if (convertNumber.getRadix() == resultRadix || convertNumber.getUnsignedRepresent().toString().equals("0") ||
-                convertNumber.getUnsignedRepresent().toString().equals("1"))
+        if (convertNumber.getRadix() == resultRadix || convertNumber.getUnsignedRepresent().equals("0") ||
+                convertNumber.getUnsignedRepresent().equals("1"))
             resultNumber = new Number(convertNumber);
         else if (EXPONENT_RADIX != -1)
             resultNumber = getFastConversion(convertNumber, resultRadix, EXPONENT_RADIX);
@@ -33,14 +35,14 @@ final class Converter {
     }
 
     static char getDigitRadixRepresent(final int num) {
-        if (num >= 2 && num <= 36)
+        if (num >= 0 && num <= 36)
             return (char)(num <= 9 ? num + 48 : num + 55);
         else
             throw new IllegalArgumentException("Impossible to get digit from number-argument! Number is more than 36 or less than 2.");
     }
 
     @Deprecated
-    private Number getFastConversion (final Number number, final int resultRadix, final int exponentRadix) {
+    private Number getFastConversion (@NotNull final Number number, final int resultRadix, final int exponent) {
         if (number.getRadix() < resultRadix) {
 
         }
@@ -50,7 +52,7 @@ final class Converter {
         return getConversionFromDecimal(getConversionToDecimal(number), resultRadix);
     }
 
-    private Number getConversionToDecimal(final Number number) {
+    private Number getConversionToDecimal(@NotNull final Number number) {
         BigDecimal result = BigDecimal.valueOf(0).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
 
         // Each digit will be raised to the power of this exponent (The max-exponent = integer_part.length - 1)
@@ -70,7 +72,7 @@ final class Converter {
         return new Number(10, result.toPlainString(), number.getSignum());
     }
 
-    private Number getConversionFromDecimal(final Number number, final int resultRadix) {
+    private Number getConversionFromDecimal(@NotNull final Number number, final int resultRadix) {
 
         // Convert integer-part, and if number has no fractional-part return 'resultStr'
         final BigInteger bigIntRadix = new BigInteger(Integer.toString(resultRadix));
@@ -95,7 +97,7 @@ final class Converter {
             final StringBuilder resultStrFract = new StringBuilder();
 
             while (resultStrFract.length() < MAX_ROUNDING_AMOUNT) {
-                final BigDecimal multiplicationResult = fractPart.multiply(bigFractRadix);
+                final BigDecimal multiplicationResult = fractPart.multiply(bigFractRadix); // using fractional-part WITH "0."-part
                 final String intPartResult = multiplicationResult.toBigInteger().toString(); // getting integer-part
                 final char charDigit = getDigitRadixRepresent(Integer.parseInt(intPartResult));
                 final String decPartResult = getFractionalPartFrom(multiplicationResult); // getting fractional-part WITHOUT "0."-part
@@ -124,7 +126,7 @@ final class Converter {
         return result;
     }
 
-    private String getFractionalPartFrom(final BigDecimal bigFractional) {
+    private String getFractionalPartFrom(@NotNull final BigDecimal bigFractional) {
         /*
         Gets fractional-part with "0."-part using BigDecimal methods
         And delete it using StringBuilder,
@@ -136,10 +138,6 @@ final class Converter {
 
     /* Getters */
 
-    /**
-     * Getter of the {@code resultNumber}-field
-     * @return The {@link Converter#resultNumber}
-     */
     Number getResultNumber() {
         return resultNumber;
     }

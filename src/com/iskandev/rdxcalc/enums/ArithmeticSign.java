@@ -26,11 +26,9 @@ public enum ArithmeticSign {
      PLUS('+'), MINUS('-'), MULTI('×'), DIV('÷');
 
     /**
-     * This is the field responsible for symbol/character of the sign
-     * Gets value in the constructor
+     * This is the field responsible for symbol/character of an arithmetic sign
      *
-     * Getting access to this field from the outside provides getter:
-     * {@link ArithmeticSign#getChar()}
+     * Getter: {@link ArithmeticSign#getChar()}
      */
     private char character;
 
@@ -46,8 +44,8 @@ public enum ArithmeticSign {
     /* Getters */
 
     /**
-     * Getter of the {@code character}-field
-     * @return The {@link ArithmeticSign#character}
+     * Getter of the {@link ArithmeticSign#character}
+     * @return symbol/character of an arithmetic sign
      */
     public char getChar() {
         return character;

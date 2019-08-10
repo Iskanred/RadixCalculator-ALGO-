@@ -1,5 +1,6 @@
 package com.iskandev.rdxcalc.algoengine;
 
+import org.jetbrains.annotations.NotNull;
 
 final class ArithmeticOperationPerformer {
 
@@ -10,7 +11,7 @@ final class ArithmeticOperationPerformer {
 
     private Number number1, number2;
 
-    ArithmeticOperationPerformer(final Number number1, final Number number2) {
+    ArithmeticOperationPerformer(@NotNull final Number number1, @NotNull final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
             throw new IllegalArgumentException("Impossible to perform an operation! Radix of the first number doesn't equal radix of the second number.");
@@ -28,13 +29,13 @@ final class ArithmeticOperationPerformer {
         if (number2.getSignum() == 0)
             return new Number(number1);
 
-        // If numbers have different signums (not zero)
+        // If numbers have different not_zero-signums
         if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0) {
-            number2 = number2.reverseSign();
+            number2 = number2.negate();
             return getDifference();
         }
 
-        // If numbers have the same signum (not zero)
+        // If numbers have the same not_zero-signum
         else {
 
             // 'number2' has the same signum as 'number1', so the result will have the same as its
@@ -63,9 +64,9 @@ final class ArithmeticOperationPerformer {
 
             // Adding necessary space to fractional-part (to the end) for the long addition
             while (num1FractStr.length() > num2FractStr.length())
-                num2FractStr.append(EMPTY_SYMBOL);
+                num2FractStr.append('0');
             while (num1FractStr.length() < num2FractStr.length())
-                num1FractStr.append(EMPTY_SYMBOL);
+                num1FractStr.append('0');
 
             // Adding necessary space to integer-part (to the beginning)  the long addition
             while (num1IntStr.length() > num2IntStr.length())
@@ -114,19 +115,32 @@ final class ArithmeticOperationPerformer {
 
         // If at least one of the number equals 0
         if (number1.getSignum() == 0)
-            return new Number(number2.reverseSign());
+            return new Number(number2.negate());
         if (number2.getSignum() == 0)
             return new Number(number1);
 
-        // If numbers have different signums (not zero)
+        // If numbers have different not_zero-signums
         if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0) {
-            number2 = number2.reverseSign();
+            number2 = number2.negate();
             return getSum();
         }
 
-        // If numbers have the same signum (not zero)
+        // If numbers have the same not_zero-signum
         else {
-            return new Number(radix, null, 0);
+            final int RESULT_SIGNUM;
+
+            if (number1.compareTo(number2) == 0)
+                return new Number(radix, "0", 0);
+
+            else if (number1.compareTo(number2) > 0) {
+                RESULT_SIGNUM = 1;
+
+            } else {
+                RESULT_SIGNUM = -1;
+            }
+
+
+            return new Number(0, "", 0);
         }
 
        /*

@@ -1,7 +1,7 @@
 package com.iskandev.rdxcalc.consoleio;
 
 import com.iskandev.rdxcalc.algoengine.Number;
-import com.iskandev.rdxcalc.enums.ArithmeticSign;
+//import com.iskandev.rdxcalc.enums.ArithmeticSign;
 import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
 
 import java.util.Scanner;
@@ -37,6 +37,8 @@ public class Main {
                 default:
                     nRes = new Number(0, null);
             }
+
+            n1.convertTo(2);
 
             System.out.println(nRes.getSignedMinusRepresent() + " " + nRes.getRadix());
 

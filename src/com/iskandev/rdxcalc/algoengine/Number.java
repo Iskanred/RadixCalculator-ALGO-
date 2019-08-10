@@ -1,11 +1,14 @@
 package com.iskandev.rdxcalc.algoengine;
 
 import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.regex.Pattern;
 
 
-public final class Number {
+public final class Number implements Comparable<Number>{
 
     private final int radix;
 
@@ -48,7 +51,7 @@ public final class Number {
         }
     }
 
-    Number(final Number number) {
+    Number(@NotNull final Number number) {
         this.radix = number.getRadix();
         this.unsignedRepresent = number.getUnsignedRepresent();
         this.signedMinusRepresent = number.getSignedMinusRepresent();
@@ -61,28 +64,48 @@ public final class Number {
         return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
     }
 
-    public Number add(final Number addendNumber) throws TooLargeNumberException {
+    public Number add(@NotNull final Number addendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, addendNumber).getSum().checkTooLarge();
     }
 
-    public Number subtract(final Number subtrahendNumber) throws TooLargeNumberException {
+    public Number subtract(@NotNull final Number subtrahendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, subtrahendNumber).getDifference().checkTooLarge();
     }
 
-    public Number multiply(final Number multiplicandNumber) throws TooLargeNumberException {
+    public Number multiply(@NotNull final Number multiplicandNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, multiplicandNumber).getProduct().checkTooLarge();
     }
 
-    public Number divide(final Number divisorNumber) throws TooLargeNumberException {
+    public Number divide(@NotNull final Number divisorNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
         return new ArithmeticOperationPerformer(this, divisorNumber).getQuotient().checkTooLarge();
     }
 
-    Number reverseSign() {
+    @Override
+    public int compareTo(@NotNull final Number comparableNumber) {
+
+        // If numbers have different signums or both have zero-signum
+        if ((signum == 0 && comparableNumber.getSignum() == 0) || signum != comparableNumber.getSignum())
+            return Integer.compare(signum, comparableNumber.getSignum());
+
+        // Else anyway numbers have the same not_zero-signum
+        else {
+            final BigDecimal thisNumDec = new BigDecimal(this.convertTo(10).getSignedMinusRepresent());
+            final BigDecimal compNumDec = new BigDecimal(comparableNumber.convertTo(10).getSignedMinusRepresent());
+
+            return thisNumDec.compareTo(compNumDec);
+        }
+    }
+
+    Number negate() {
         return new Number(radix, unsignedRepresent, -signum);
+    }
+
+    private Number abs() {
+        return (signum >= 0 ? this : this.negate());
     }
 
     private int checkRadixCorrectness (final int radix) {
@@ -92,7 +115,7 @@ public final class Number {
             throw new IllegalArgumentException("Radix of number is incorrect.");
     }
 
-    private String getCorrectedRepresent(final String initStringRepresent) {
+    private String getCorrectedRepresent(@Nullable final String initStringRepresent) {
 
         final StringBuilder correctableRepresent = checkRepresentationCorrectness(initStringRepresent);
 
@@ -105,7 +128,7 @@ public final class Number {
         return getWithoutInsignificantSymbols(correctableRepresent).toString();
     }
 
-    private StringBuilder checkRepresentationCorrectness (final String stringRepresent) {
+    private StringBuilder checkRepresentationCorrectness (@Nullable final String stringRepresent) {
 
         if (stringRepresent == null)
             throw new NullPointerException("Number's string representation is null.");
@@ -137,7 +160,7 @@ public final class Number {
         }
     }
 
-    private StringBuilder getWithoutInsignificantSymbols(final StringBuilder stringRepresent) {
+    private StringBuilder getWithoutInsignificantSymbols(@NotNull final StringBuilder stringRepresent) {
 
         final int DECPOINT_INDEX = stringRepresent.indexOf(".");
         final StringBuilder correctableRepresent = new StringBuilder(stringRepresent);
@@ -167,60 +190,37 @@ public final class Number {
     }
 
     private Number checkTooLarge() throws TooLargeNumberException {
-        final int INTEGER_MAX_LENGTH = 25;
+        final Number MAX_NUMBER = new Number(10, "9999999999999999999999999.9999999999", 1);
 
-        if (this.getIntegerPartRepresent().length() <= INTEGER_MAX_LENGTH)
-            return this;
-        else
+        // If positive representation of a Number more than MAX_NUMBER
+        if (this.abs().compareTo(MAX_NUMBER) > 0)
             throw new TooLargeNumberException();
+
+        return this;
     }
 
     /* Getters */
 
-    /**
-     * Getter of the {@code radix}-field
-     * @return The {@link Number#radix}
-     */
     public int getRadix() {
         return radix;
     }
 
-    /**
-     * Getter of the {@code signedMinusRepresent}-field
-     * @return {@link Number#signedMinusRepresent}
-     */
     public String getSignedMinusRepresent() {
         return signedMinusRepresent;
     }
 
-    /**
-     * Getter of the {@code signum}-field
-     * @return The {@link Number#signum}
-     */
     int getSignum() {
         return signum;
     }
 
-    /**
-     * Getter of the {@code fullRepresent}-field
-     * @return {@link Number#unsignedRepresent}
-     */
     String getUnsignedRepresent() {
         return unsignedRepresent;
     }
 
-    /**
-     * Getter of the {@code integerPartRepresent}-field
-     * @return The {@link Number#integerPartRepresent}
-     */
     String getIntegerPartRepresent() {
         return integerPartRepresent;
     }
 
-    /**
-     * Getter of the {@code fractionalPartRepresent}-field
-     * @return The {@link Number#fractionalPartRepresent}
-     */
     String getFractionalPartRepresent() {
         return fractionalPartRepresent;
     }
