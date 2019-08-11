@@ -34,11 +34,8 @@ final class Converter {
             resultNumber = getConversionFromDecimal(getConversionToDecimal(convertNumber), resultRadix);
     }
 
-    static char getDigitRadixRepresent(final int num) {
-        if (num >= 0 && num <= 36)
-            return (char)(num <= 9 ? num + 48 : num + 55);
-        else
-            throw new IllegalArgumentException("Impossible to get digit from number-argument! Number is more than 36 or less than 2.");
+    static char forDigit(final int digit) {
+        return Character.toUpperCase(Character.forDigit(digit, Number.MAX_RADIX));
     }
 
     @Deprecated
@@ -62,8 +59,8 @@ final class Converter {
 
         for (int i = 0; i < number.getUnsignedRepresent().length(); i++) {
             if (number.getUnsignedRepresent().charAt(i) != '.') {
-                final int digit = Character.getNumericValue(number.getUnsignedRepresent().charAt(i)); // letters have normal conversion
-                final BigDecimal resultDigit = BigDecimal.valueOf(digit * getIntPower(number.getRadix(), exp))
+                final int charDigit = Character.getNumericValue(number.getUnsignedRepresent().charAt(i));
+                final BigDecimal resultDigit = BigDecimal.valueOf(charDigit * getIntPower(number.getRadix(), exp))
                         .setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
 
                 result = result.add(resultDigit); // convert every digit in decimal numeral-system and round it
@@ -86,7 +83,7 @@ final class Converter {
             final BigInteger divisionResult = intPart.divide(bigIntRadix);
             final BigInteger subtractionMinuend = divisionResult.multiply(bigIntRadix);
             final String subtractionResult = intPart.subtract(subtractionMinuend).toString();
-            final char charDigit = getDigitRadixRepresent(Integer.parseInt(subtractionResult));
+            final char charDigit = forDigit(Integer.parseInt(subtractionResult));
 
             resultStr.insert(0, charDigit);
             intPart = divisionResult;
@@ -102,7 +99,7 @@ final class Converter {
             while (resultStrFract.length() < MAX_ROUNDING_AMOUNT) {
                 final BigDecimal multiplicationResult = fractPart.multiply(bigFractRadix); // using fractional-part WITH "0."-part
                 final String intPartResult = multiplicationResult.toBigInteger().toString(); // getting integer-part
-                final char charDigit = getDigitRadixRepresent(Integer.parseInt(intPartResult));
+                final char charDigit = forDigit(Integer.parseInt(intPartResult));
                 final String decPartResult = getFractionalPartFrom(multiplicationResult); // getting fractional-part WITHOUT "0."-part
 
                 resultStrFract.append(charDigit);

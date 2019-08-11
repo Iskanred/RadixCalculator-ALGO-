@@ -10,6 +10,14 @@ import java.util.regex.Pattern;
 
 public final class Number implements Comparable<Number> {
 
+    static final int MAX_RADIX = 36;
+
+    private static final int MIN_RADIX = 2;
+
+    private static final Number ABS_MAX_DECIMAL_VALUE =
+            new Number(10, "9999999999999999999999999.9999999999", 1);
+
+
     private final int radix;
 
     private final String unsignedRepresent, signedMinusRepresent;
@@ -106,17 +114,17 @@ public final class Number implements Comparable<Number> {
     }
 
     @NotNull
+    Number abs() {
+        return (signum >= 0 ? this : this.negate());
+    }
+
+    @NotNull
     Number negate() {
         return new Number(radix, unsignedRepresent, -signum);
     }
 
-    @NotNull
-    private Number abs() {
-        return (signum >= 0 ? this : this.negate());
-    }
-
     private int checkRadixCorrectness (final int radix) {
-        if (radix >= 2 && radix <= 36)
+        if (radix >= MIN_RADIX && radix <= MAX_RADIX)
             return radix;
         else
             throw new IllegalArgumentException("Radix of number is incorrect.");
@@ -201,10 +209,9 @@ public final class Number implements Comparable<Number> {
 
     @NotNull
     private Number checkTooLarge() throws TooLargeNumberException {
-        final Number MAX_NUMBER = new Number(10, "9999999999999999999999999.9999999999", 1);
 
-        // If positive representation of a Number more than MAX_NUMBER
-        if (this.abs().compareTo(MAX_NUMBER) > 0)
+        // If absolute value of a Number more than 'ABS_MAX_DECIMAL_VALUE'
+        if (this.abs().compareTo(ABS_MAX_DECIMAL_VALUE) > 0)
             throw new TooLargeNumberException();
 
         return this;

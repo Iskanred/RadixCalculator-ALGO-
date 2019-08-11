@@ -10,6 +10,10 @@ public class Main {
 
     private static Scanner in = new Scanner(System.in);
 
+    private static void print(final Number number) {
+        System.out.println(number.getSignedMinusRepresent() + " " + number.getRadix());
+    }
+
     public static void main(String[] args) {
 
         try {
@@ -38,9 +42,8 @@ public class Main {
                     nRes = new Number(0, null);
             }
 
-            n1.convertTo(2);
+            print(nRes);
 
-            System.out.println(nRes.getSignedMinusRepresent() + " " + nRes.getRadix());
 
         } catch (NullPointerException | IllegalArgumentException | TooLargeNumberException e) {
             e.printStackTrace();
