@@ -70,7 +70,7 @@ public final class Number implements Comparable<Number> {
 
     @NotNull
     public Number convertTo(final int radix) {
-        return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
+        return Converter.getConversion(this, checkRadixCorrectness(radix));
     }
 
     @NotNull

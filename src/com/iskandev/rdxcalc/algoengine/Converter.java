@@ -12,26 +12,24 @@ final class Converter {
     @Deprecated
     static final int MAX_ROUNDING_AMOUNT = 10;
 
-
-    private final Number resultNumber;
-
-    Converter(@NotNull final Number convertNumber, final int resultRadix) {
+    @NotNull
+    static Number getConversion(@NotNull final Number convertibleNumber, final int resultRadix) {
 
         // Used for the fast-conversion
-        final int EXPONENT_RADIX = logInt(Math.min(convertNumber.getRadix(), resultRadix),
-                Math.max(convertNumber.getRadix(), resultRadix));
+        final int EXPONENT_RADIX = logInt(Math.min(convertibleNumber.getRadix(), resultRadix),
+                Math.max(convertibleNumber.getRadix(), resultRadix));
 
-        if (convertNumber.getRadix() == resultRadix || convertNumber.getUnsignedRepresent().equals("0") ||
-                convertNumber.getUnsignedRepresent().equals("1"))
-            resultNumber = new Number(convertNumber);
+        if (convertibleNumber.getRadix() == resultRadix || convertibleNumber.getUnsignedRepresent().equals("0") ||
+                convertibleNumber.getUnsignedRepresent().equals("1"))
+            return new Number(convertibleNumber);
         else if (EXPONENT_RADIX != -1)
-            resultNumber = getFastConversion(convertNumber, resultRadix, EXPONENT_RADIX);
+            return getFastConversion(convertibleNumber, resultRadix, EXPONENT_RADIX);
         else if (resultRadix == 10)
-            resultNumber = getConversionToDecimal(convertNumber);
-        else if (convertNumber.getRadix() == 10)
-            resultNumber = getConversionFromDecimal(convertNumber, resultRadix);
+            return getConversionToDecimal(convertibleNumber);
+        else if (convertibleNumber.getRadix() == 10)
+            return getConversionFromDecimal(convertibleNumber, resultRadix);
         else
-            resultNumber = getConversionFromDecimal(getConversionToDecimal(convertNumber), resultRadix);
+            return getConversionFromDecimal(getConversionToDecimal(convertibleNumber), resultRadix);
     }
 
     static char forDigit(final int digit) {
@@ -40,7 +38,7 @@ final class Converter {
 
     @Deprecated
     @NotNull
-    private Number getFastConversion (@NotNull final Number number, final int resultRadix, final int exponent) {
+    private static Number getFastConversion (@NotNull final Number number, final int resultRadix, final int exponent) {
         if (number.getRadix() < resultRadix) {
 
         }
@@ -51,7 +49,7 @@ final class Converter {
     }
 
     @NotNull
-    private Number getConversionToDecimal(@NotNull final Number number) {
+    private static Number getConversionToDecimal(@NotNull final Number number) {
         BigDecimal result = BigDecimal.valueOf(0).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
 
         // Each digit will be raised to the power of this exponent (The max-exponent = integer_part.length - 1)
@@ -72,7 +70,7 @@ final class Converter {
     }
 
     @NotNull
-    private Number getConversionFromDecimal(@NotNull final Number number, final int resultRadix) {
+    private static Number getConversionFromDecimal(@NotNull final Number number, final int resultRadix) {
 
         // Convert integer-part, and if number has no fractional-part return 'resultStr'
         final BigInteger bigIntRadix = new BigInteger(Integer.toString(resultRadix));
@@ -111,14 +109,14 @@ final class Converter {
         return new Number(resultRadix, resultStr.toString(), number.getSignum());
     }
 
-    private int logInt(final int num1, final int num2) {
+    private static int logInt(final int num1, final int num2) {
         for (int i = 2; i <= 5; i++)
             if (getIntPower(num1, i) == num2)
                 return i;
         return -1; // an integer logarithm doesn't exist
     }
 
-    private int getIntPower(final int number, final int exponent) {
+    private static int getIntPower(final int number, final int exponent) {
         int result = number; // the number to the power one
 
         for (int i = 1; i < exponent; i++) // the min power is two
@@ -127,20 +125,12 @@ final class Converter {
     }
 
     @NotNull
-    private String getFractionalPartFrom(@NotNull final BigDecimal bigFractional) {
+    private static String getFractionalPartFrom(@NotNull final BigDecimal bigFractional) {
         /*
         Gets fractional-part with "0."-part using BigDecimal methods
         And delete it using StringBuilder,
         So get the fractional-part without "0."-part
          */
         return (new StringBuilder(bigFractional.remainder(BigDecimal.ONE).toPlainString()).delete(0, 2)).toString();
-    }
-
-
-    /* Getters */
-
-    @NotNull
-    Number getResultNumber() {
-        return resultNumber;
     }
 }

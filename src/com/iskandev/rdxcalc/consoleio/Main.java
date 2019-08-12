@@ -17,38 +17,43 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            final Number n1 = new Number(in.nextInt(), in.next());
-
-            final char op = in.next().charAt(0);
-
-            final Number n2 = new Number(in.nextInt(), in.next());
-
-            final Number nRes;
-
-            switch (op) {
-                case '+' :
-                    nRes = n1.add(n2);
-                    break;
-                case '-' :
-                    nRes = n1.subtract(n2);
-                    break;
-                case '×' :
-                    nRes = n1.multiply(n2);
-                    break;
-                case '÷' :
-                    nRes = n1.divide(n2);
-                    break;
-                default:
-                    nRes = new Number(0, null);
+            if (in.next().equals("c")) {
+                final Number num = new Number(in.nextInt(), in.next());
+                print(num.convertTo(in.nextInt()));
             }
 
-            print(nRes);
+            else {
+                    final Number n1 = new Number(in.nextInt(), in.next());
 
+                    final char op = in.next().charAt(0);
 
+                    final Number n2 = new Number(in.nextInt(), in.next());
+
+                    final Number nRes;
+
+                    switch (op) {
+                        case '+':
+                            nRes = n1.add(n2);
+                            break;
+                        case '-':
+                            nRes = n1.subtract(n2);
+                            break;
+                        case '×':
+                            nRes = n1.multiply(n2);
+                            break;
+                        case '÷':
+                            nRes = n1.divide(n2);
+                            break;
+                        default:
+                            nRes = new Number(0, null);
+                    }
+
+                    print(nRes);
+                    nRes.convertTo(2);
+            }
         } catch (NullPointerException | IllegalArgumentException | TooLargeNumberException e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
         }
-
     }
 }
