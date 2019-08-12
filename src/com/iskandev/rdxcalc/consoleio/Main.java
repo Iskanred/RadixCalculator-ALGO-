@@ -17,6 +17,7 @@ public class Main {
     public static void main(String[] args) {
 
         try {
+
             final Number n1 = new Number(in.nextInt(), in.next());
 
             final char op = in.next().charAt(0);
@@ -44,6 +45,7 @@ public class Main {
 
             print(nRes);
 
+        print (n1.convertTo(in.nextInt()));
 
         } catch (NullPointerException | IllegalArgumentException | TooLargeNumberException e) {
             e.printStackTrace();

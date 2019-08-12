@@ -70,31 +70,31 @@ public final class Number implements Comparable<Number> {
 
     @NotNull
     public Number convertTo(final int radix) {
-        return new Converter(this, checkRadixCorrectness(radix)).getResultNumber();
+        return Converter.getConversion(this, checkRadixCorrectness(radix));
     }
 
     @NotNull
     public Number add(@NotNull final Number addendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperationPerformer(this, addendNumber).getSum().checkTooLarge();
+        return ArithmeticOperationPerformer.getSum(this, addendNumber).checkTooLarge();
     }
 
     @NotNull
     public Number subtract(@NotNull final Number subtrahendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperationPerformer(this, subtrahendNumber).getDifference().checkTooLarge();
+        return ArithmeticOperationPerformer.getDifference(this, subtrahendNumber).checkTooLarge();
     }
 
     @NotNull
     public Number multiply(@NotNull final Number multiplicandNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperationPerformer(this, multiplicandNumber).getProduct().checkTooLarge();
+        return ArithmeticOperationPerformer.getProduct(this, multiplicandNumber).checkTooLarge();
     }
 
     @NotNull
     public Number divide(@NotNull final Number divisorNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return new ArithmeticOperationPerformer(this, divisorNumber).getQuotient().checkTooLarge();
+        return ArithmeticOperationPerformer.getQuotient(this, divisorNumber).checkTooLarge();
     }
 
     @Override
