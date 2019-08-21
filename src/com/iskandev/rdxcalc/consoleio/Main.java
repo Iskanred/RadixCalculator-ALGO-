@@ -10,19 +10,15 @@ public class Main {
 
     private static Scanner in = new Scanner(System.in);
 
-    private static void print(final Number number) {
-        System.out.println(number.getSignedMinusRepresent() + " " + number.getRadix());
-    }
-
     public static void main(String[] args) {
 
         try {
 
-            final Number n1 = new Number(in.nextInt(), in.next());
+            final Number n1 = Number.valueOfSigned(in.nextInt(), in.next());
 
             final char op = in.next().charAt(0);
 
-            final Number n2 = new Number(in.nextInt(), in.next());
+            final Number n2 = Number.valueOfSigned(in.nextInt(), in.next());
 
             final Number nRes;
 
@@ -40,12 +36,12 @@ public class Main {
                     nRes = n1.divide(n2);
                     break;
                 default:
-                    nRes = new Number(0, null);
+                    nRes = Number.valueOfSigned(0, "");
             }
 
-            print(nRes);
+            System.out.println(n1 + " + " + n2 + " = " + nRes);
 
-        print (n1.convertTo(in.nextInt()));
+            System.out.println(nRes + " -> " + nRes.convertTo(in.nextInt()));
 
         } catch (NullPointerException | IllegalArgumentException | TooLargeNumberException e) {
             e.printStackTrace();

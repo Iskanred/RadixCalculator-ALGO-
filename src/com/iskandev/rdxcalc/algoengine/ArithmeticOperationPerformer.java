@@ -6,8 +6,21 @@ final class ArithmeticOperationPerformer {
 
     private final static char EMPTY_SYMBOL = ' ';
 
+    /**
+     * @deprecated useless unused constructor
+     * {@code ArithmeticOperationPerformer}-class doesn't require to create an instance to perform arithmetic operations
+     *
+     * And it requires to use public static methods instead
+     *
+     * @see #getSum(Number, Number)
+     * @see #getDifference(Number, Number)
+     * @see #getProduct(Number, Number)
+     * @see #getQuotient(Number, Number)
+     */
+    private ArithmeticOperationPerformer() {}
+
     @NotNull
-    private static String[] getNormalizedNumbers (@NotNull final Number number1, @NotNull final Number number2) {
+    private static String[] getSameLengthNumbers(@NotNull final Number number1, @NotNull final Number number2) {
         final StringBuilder num1Int = new StringBuilder(number1.getIntegerPartRepresent()),
                 num1Fract = new StringBuilder(number1.getFractionalPartRepresent());
         final StringBuilder num2Int = new StringBuilder(number2.getIntegerPartRepresent()),
@@ -42,30 +55,30 @@ final class ArithmeticOperationPerformer {
     static Number getSum(@NotNull final Number number1, @NotNull final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
-            throw new IllegalArgumentException("Radix of first number doesn't equal radix of second number.");
+            throw new IllegalArgumentException("Radixes aren't equal");
 
         // If at least one of the number equals 0
-        if (number1.getSignum() == 0)
-            return new Number(number2);
-        if (number2.getSignum() == 0)
-            return new Number(number1);
+        if (number1.equals(Number.ZERO))
+            return number2;
+        if (number2.equals(Number.ZERO))
+            return number1;
 
-        // If numbers have different not_zero-signums
-        if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0)
+        // If numbers have different not zero-signums
+        if (number1.signum() != number2.signum())
             return getDifference(number1, number2.negate());
 
-        // If numbers have the same not_zero-signum
+        // If numbers have the same not zero-signum
         else {
 
             // 'number2' has the same signum as 'number1', so the result will have the same as its
-            final int RESULT_SIGNUM = number1.getSignum();
+            final int RESULT_SIGNUM = number1.signum();
             final int RADIX = number1.getRadix(); // or 'number2.getRadix()
 
-            // Normalized numbers full unsigned representations
-            final String[] numRepresents = getNormalizedNumbers(number1, number2);
+            // The same length numbers full unsigned representations
+            final String[] numRepresents = getSameLengthNumbers(number1, number2);
             final String num1Str = numRepresents[0], num2Str = numRepresents[1];
 
-            // Will be inverted at the right, then(before return) it will become normalized (at the left)
+            // Will be inverted at the right, then(before return) it will become corrected (at the left)
             final StringBuilder resultStr = new StringBuilder();
 
             /*
@@ -102,9 +115,9 @@ final class ArithmeticOperationPerformer {
             if (adder)
                 resultStr.append('1');
 
-            resultStr.reverse(); // invert and normalize the number to read at the left
+            resultStr.reverse(); // invert and correct the number to read at the left
 
-            return new Number(RADIX, resultStr.toString(), RESULT_SIGNUM);
+            return Number.valueOfUnsigned(RADIX, resultStr.toString(), RESULT_SIGNUM);
         }
     }
 
@@ -112,32 +125,32 @@ final class ArithmeticOperationPerformer {
     static Number getDifference(@NotNull final Number number1, @NotNull final Number number2)  {
 
         if (number1.getRadix() != number2.getRadix())
-            throw new IllegalArgumentException("Radix of first number doesn't equal radix of second number.");
-
-        // If at least one of the number equals 0
-        if (number1.getSignum() == 0)
-            return new Number(number2.negate());
-        if (number2.getSignum() == 0)
-            return new Number(number1);
+            throw new IllegalArgumentException("Radixes aren't equal");
 
         // If numbers are equal (and its signums too)
-        if (number1.compareTo(number2) == 0)
-            return new Number(number1.getRadix(), "0", 0);
+        if (number1.equals(number2))
+            return Number.ZERO;
 
-        // If numbers have different not_zero-signums
-        else if (number1.getSignum() > 0 && number2.getSignum() < 0 || number1.getSignum() < 0 && number2.getSignum() > 0)
+        // If at least one of the number equals 0
+        if (number1.equals(Number.ZERO))
+            return number2.negate();
+        if (number2.equals(Number.ZERO))
+            return number1;
+
+        // If numbers have different not zero-signums
+        else if (number1.signum() != number2.signum())
             return getSum(number1, number2.negate());
 
-        // If numbers have the same not_zero-signum and its are not equal
+        // Else anyway numbers have the same not zero-signum and its aren't equal
         else {
             final int RADIX = number1.getRadix(); // or 'number2.getRadix()
             final int RESULT_SIGNUM;
 
-            // Normalized numbers full unsigned representations
-            final String[] numRepresents = getNormalizedNumbers(number1, number2);
+            // The same length numbers full unsigned representations
+            final String[] numRepresents = getSameLengthNumbers(number1, number2);
             final String maxNumStr, minNumStr;
 
-            // Will be inverted at the right, then(before return) it will become normalized (at the left)
+            // Will be inverted at the right, then(before return) it will become corrected (at the left)
             final StringBuilder resultStr = new StringBuilder();
 
             /*
@@ -147,13 +160,13 @@ final class ArithmeticOperationPerformer {
             boolean taker = false;
 
             if (number1.abs().compareTo(number2.abs()) > 0) {
-                RESULT_SIGNUM = number1.getSignum() > 0 ? 1 : -1;
+                RESULT_SIGNUM = number1.signum();
 
                 maxNumStr = numRepresents[0];
                 minNumStr = numRepresents[1];
 
             } else {
-                RESULT_SIGNUM = number1.getSignum() < 0 ? 1 : -1;
+                RESULT_SIGNUM = -number1.signum();
 
                 maxNumStr = numRepresents[1];
                 minNumStr = numRepresents[0];
@@ -184,9 +197,9 @@ final class ArithmeticOperationPerformer {
                 resultStr.append(Converter.forDigit(digitOfResult));
             }
 
-            resultStr.reverse(); // invert and normalize the number to read at the left
+            resultStr.reverse(); // invert and correct the number to read at the left
 
-            return new Number(RADIX, resultStr.toString(), RESULT_SIGNUM);
+            return Number.valueOfUnsigned(RADIX, resultStr.toString(), RESULT_SIGNUM);
         }
 
     }
@@ -195,7 +208,7 @@ final class ArithmeticOperationPerformer {
     static Number getProduct(@NotNull final Number number1, @NotNull final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
-            throw new IllegalArgumentException("Radix of first number doesn't equal radix of second number.");
+            throw new IllegalArgumentException("Radixes aren't equal");
 
         return null;
     }
@@ -204,7 +217,7 @@ final class ArithmeticOperationPerformer {
     static Number getQuotient(@NotNull final Number number1, @NotNull final Number number2) {
 
         if (number1.getRadix() != number2.getRadix())
-            throw new IllegalArgumentException("Radix of first number doesn't equal radix of second number.");
+            throw new IllegalArgumentException("Radixes aren't equal");
 
         return null;
     }

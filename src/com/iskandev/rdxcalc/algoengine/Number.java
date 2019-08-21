@@ -1,117 +1,194 @@
 package com.iskandev.rdxcalc.algoengine;
 
 import com.iskandev.rdxcalc.exceptions.TooLargeNumberException;
+import jdk.jfr.Unsigned;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
-import java.util.regex.Pattern;
 
 
 public final class Number implements Comparable<Number> {
 
+    static final int MIN_RADIX = 2;
+
     static final int MAX_RADIX = 36;
 
-    private static final int MIN_RADIX = 2;
+    static final Number NEGATIVE_ONE = new Number("1", -1);
 
-    private static final Number ABS_MAX_DECIMAL_VALUE =
+    static final Number ZERO = new Number("0", 0);
+
+    static final Number POSITIVE_ONE = new Number("1", 1);
+
+    @Unsigned
+    static final Number ABSOLUTE_MAX_DECIMAL_VALUE =
             new Number(10, "9999999999999999999999999.9999999999", 1);
 
 
+    @Unsigned
     private final int radix;
 
-    private final String unsignedRepresent, signedMinusRepresent;
+    @Unsigned
+    private final String unsignedRepresent;
 
-    private final String integerPartRepresent, fractionalPartRepresent;
+    @Unsigned
+    private final String integerPartRepresent, fractionalPartRepresent; // unsigned
 
-    private int signum;
+    private final int signum;
 
 
-    public Number(final int radix, final String stringRepresent) throws TooLargeNumberException {
-        this(radix, stringRepresent, 1);
-        checkTooLarge();
-    }
+    @Contract
+    private Number(final int radix, @NotNull final String unsignedRepresent, final int signum) {
 
-    Number(final int radix, final String stringRepresent, final int signum) {
+        // If one of the Number equals -1, 0, 1
+        if (signum == 0 || unsignedRepresent.equals("0"))
+            throw new IllegalArgumentException("ZERO is already existed.");
+        if (unsignedRepresent.equals("1"))
+            throw new IllegalArgumentException("ONE is already existed.");
 
+        this.radix = radix;
+        this.unsignedRepresent = unsignedRepresent;
         this.signum = signum;
-        this.radix = checkRadixCorrectness(radix);
-        this.unsignedRepresent = getCorrectedRepresent(stringRepresent); // also can make 'signum'-fields negative(-1)
 
-        // If it's equal ZERO - it has zero signum
-        if (unsignedRepresent.equals("0"))
-            this.signum = 0;
+        String[] numberPartRepresents = NumberCorrector.getNumberPartsRepresents(unsignedRepresent);
+        integerPartRepresent = numberPartRepresents[0];
+        fractionalPartRepresent = numberPartRepresents[1];
+    }
 
-        // If it has negative-sign - signed-repesent has minus
-        if (this.signum == -1)
-            this.signedMinusRepresent = "-" + this.unsignedRepresent;
-        else
-            this.signedMinusRepresent = this.unsignedRepresent;
+    @Contract
+    private Number(@NotNull final String unsignedRepresent, final int signum) {
 
-        final int DECPOINT_INDEX = unsignedRepresent.indexOf(".");
+        this.radix = 10;
+        this.unsignedRepresent = unsignedRepresent;
+        this.signum = signum;
 
-        if (DECPOINT_INDEX != -1) { // if number has a fractional-part
-            integerPartRepresent = unsignedRepresent.substring(0, DECPOINT_INDEX);
-            fractionalPartRepresent = unsignedRepresent.substring(DECPOINT_INDEX + 1);
+        String[] numberPartRepresents = NumberCorrector.getNumberPartsRepresents(unsignedRepresent);
+        integerPartRepresent = numberPartRepresents[0];
+        fractionalPartRepresent = numberPartRepresents[1];
+    }
+
+
+    @NotNull
+    public static Number valueOfSigned(final int radix, @NotNull final String stringRepresent) throws TooLargeNumberException {
+
+        NumberCorrector.checkNumberRadix(radix);
+
+        final String correctedRepresent;
+        final int signum;
+
+        if (stringRepresent.charAt(0) == '-') {
+            signum = -1;
+            correctedRepresent = NumberCorrector.getCleanedNumberRepresentation(stringRepresent.substring(1), radix);
         } else {
-            integerPartRepresent = unsignedRepresent;
-            fractionalPartRepresent = "";
+            signum = 1;
+            correctedRepresent = NumberCorrector.getCleanedNumberRepresentation(stringRepresent, radix);
         }
+
+        if (correctedRepresent.equals("0"))
+            return ZERO;
+
+        if (correctedRepresent.equals("1"))
+            return signum > 0 ? POSITIVE_ONE : NEGATIVE_ONE;
+
+        return NumberCorrector.getCheckedIfTooLargeNumber(new Number(radix, correctedRepresent, signum));
     }
 
-    Number(@NotNull final Number number) {
-        this.radix = number.getRadix();
-        this.unsignedRepresent = number.getUnsignedRepresent();
-        this.signedMinusRepresent = number.getSignedMinusRepresent();
-        this.integerPartRepresent = number.getIntegerPartRepresent();
-        this.fractionalPartRepresent = number.getFractionalPartRepresent();
-        this.signum = number.getSignum();
+    @Contract
+    @NotNull
+    static Number valueOfUnsigned(final int radix, @NotNull final String unsignedStringRepresent, final int signum) {
+
+        NumberCorrector.checkNumberSignum(signum);
+        NumberCorrector.checkNumberRadix(radix);
+
+        String correctedRepresent = NumberCorrector.getCleanedNumberRepresentation(unsignedStringRepresent, radix);
+
+        if (correctedRepresent.equals("0"))
+            return ZERO;
+
+        if (correctedRepresent.equals("1"))
+            return signum > 0 ? POSITIVE_ONE : NEGATIVE_ONE;
+
+        return new Number(radix, correctedRepresent, signum);
     }
+
 
     @NotNull
     public Number convertTo(final int radix) {
-        return Converter.getConversion(this, checkRadixCorrectness(radix));
+        NumberCorrector.checkNumberRadix(radix);
+        return Converter.getConversion(this, radix);
     }
 
     @NotNull
     public Number add(@NotNull final Number addendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return ArithmeticOperationPerformer.getSum(this, addendNumber).checkTooLarge();
+        return NumberCorrector.getCheckedIfTooLargeNumber(ArithmeticOperationPerformer.getSum(this, addendNumber));
     }
 
     @NotNull
     public Number subtract(@NotNull final Number subtrahendNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return ArithmeticOperationPerformer.getDifference(this, subtrahendNumber).checkTooLarge();
+        return NumberCorrector.getCheckedIfTooLargeNumber(ArithmeticOperationPerformer.getDifference(this, subtrahendNumber));
     }
 
     @NotNull
     public Number multiply(@NotNull final Number multiplicandNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return ArithmeticOperationPerformer.getProduct(this, multiplicandNumber).checkTooLarge();
+        return NumberCorrector.getCheckedIfTooLargeNumber(ArithmeticOperationPerformer.getProduct(this, multiplicandNumber));
     }
 
     @NotNull
     public Number divide(@NotNull final Number divisorNumber) throws TooLargeNumberException {
         // To convert both of numbers to the same numeral-system
-        return ArithmeticOperationPerformer.getQuotient(this, divisorNumber).checkTooLarge();
+        return NumberCorrector.getCheckedIfTooLargeNumber(ArithmeticOperationPerformer.getQuotient(this, divisorNumber));
+    }
+
+
+    /**
+     * Don't use in the {@link Converter}-class if {@code obj} doesn't equal:
+     * {@link Number#NEGATIVE_ONE}, {@link Number#ZERO}, {@link Number#POSITIVE_ONE}
+     */
+    @Override
+    public boolean equals(@NotNull Object obj) {
+        if (obj.getClass() != Number.class)
+            return false;
+
+        if ((obj == NEGATIVE_ONE && this != NEGATIVE_ONE) || (obj == ZERO && this != ZERO) || (obj == POSITIVE_ONE && this != POSITIVE_ONE))
+            return false;
+
+        return this.compareTo((Number) obj) == 0;
     }
 
     @Override
     public int compareTo(@NotNull final Number comparableNumber) {
 
-        // If numbers have different signums or both have zero-signum
-        if ((signum == 0 && comparableNumber.getSignum() == 0) || signum != comparableNumber.getSignum())
-            return Integer.compare(signum, comparableNumber.getSignum());
+        // If Numbers have the same instance (catches ZERO, POSITIVE-ONE, NEGATIVE-ONE)
+        if (this == comparableNumber)
+            return 0;
 
-        // Else anyway numbers have the same not_zero-signum
+        // If Numbers have different signums
+        if (signum != comparableNumber.signum)
+            return Integer.compare(signum, comparableNumber.signum);
+
+        // Else anyway numbers have the same not zero-signum
         else {
-            final BigDecimal thisNumDec = new BigDecimal(this.convertTo(10).getSignedMinusRepresent());
-            final BigDecimal compNumDec = new BigDecimal(comparableNumber.convertTo(10).getSignedMinusRepresent());
+            final BigDecimal thisNumDec = new BigDecimal(this.convertTo(10).getRepresent());
+            final BigDecimal compNumDec = new BigDecimal(comparableNumber.convertTo(10).getRepresent());
 
             return thisNumDec.compareTo(compNumDec);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return new BigDecimal(this.convertTo(10).getRepresent()).hashCode();
+    }
+
+    @Override
+    @NotNull
+    public String toString() {
+        return getRepresent() + " (" + radix + ")";
+    }
+
 
     @NotNull
     Number abs() {
@@ -120,121 +197,32 @@ public final class Number implements Comparable<Number> {
 
     @NotNull
     Number negate() {
+        if (this.equals(NEGATIVE_ONE))
+            return POSITIVE_ONE;
+
+        if (this.equals(ZERO))
+            return this;
+
+        if (this.equals(POSITIVE_ONE))
+            return NEGATIVE_ONE;
+
         return new Number(radix, unsignedRepresent, -signum);
-    }
-
-    private int checkRadixCorrectness (final int radix) {
-        if (radix >= MIN_RADIX && radix <= MAX_RADIX)
-            return radix;
-        else
-            throw new IllegalArgumentException("Radix of number is incorrect.");
-    }
-
-    @NotNull
-    private String getCorrectedRepresent(@Nullable final String initStringRepresent) {
-
-        final StringBuilder correctableRepresent = checkRepresentationCorrectness(initStringRepresent);
-
-        // If number has minus at the beginning - it has negative signum, delete minus
-        if (correctableRepresent.charAt(0) == '-') {
-            this.signum = -1;
-            correctableRepresent.deleteCharAt(0);
-        }
-
-        return getWithoutInsignificantSymbols(correctableRepresent).toString();
-    }
-
-    @NotNull
-    private StringBuilder checkRepresentationCorrectness (@Nullable final String stringRepresent) {
-
-        if (stringRepresent == null)
-            throw new NullPointerException("Number's string representation is null.");
-
-        else if (stringRepresent.isEmpty())
-            throw new NumberFormatException("Number's string representation is empty.");
-
-        else {
-
-            if (stringRepresent.equals("-"))
-                throw new NumberFormatException("\"-\" is incorrect representation of number.");
-
-            // Check if a representation of a number matches the regex-pattern
-            if (!Pattern.matches("^-?[A-Z\\d]*\\.?[A-Z\\d]*$", stringRepresent))
-                throw new NumberFormatException("\"" + stringRepresent + "\" contains incorrect characters.");
-
-            // Check if at least (one digit of a number) >= number's radix
-            for (int i = 0; i < stringRepresent.length(); i++) {
-                /*
-                ignore if it's a decimal point('.') or minus('-') symbol;
-                compare with number's radix if it's a digit or a letter symbol
-                 */
-                if (stringRepresent.charAt(i) != '-' && stringRepresent.charAt(i) != '.' &&
-                        Character.getNumericValue(stringRepresent.charAt(i)) >= radix)
-                    throw new NumberFormatException("\"" + stringRepresent + "\" contains digits which is more than radix of number.");
-            }
-
-            return new StringBuilder(stringRepresent);
-        }
-    }
-
-    @NotNull
-    private StringBuilder getWithoutInsignificantSymbols(@NotNull final StringBuilder stringRepresent) {
-
-        final int DECPOINT_INDEX = stringRepresent.indexOf(".");
-        final StringBuilder correctableRepresent = new StringBuilder(stringRepresent);
-
-        // Clearing the trailing zeros and insignificant point at the end of a number's representation
-        if (DECPOINT_INDEX != -1) {
-
-            while (correctableRepresent.charAt(correctableRepresent.length() - 1) == '0')
-                correctableRepresent.deleteCharAt(correctableRepresent.length() - 1);
-
-            if (correctableRepresent.length() - 1 == DECPOINT_INDEX)
-                correctableRepresent.deleteCharAt(correctableRepresent.length() - 1);
-        }
-
-        // Clearing the leading zeros and insignificant point at the beginning of a number's representation
-        try {
-            while (correctableRepresent.charAt(0) == '0' && correctableRepresent.charAt(1) != '.')
-                correctableRepresent.deleteCharAt(0);
-        } catch (StringIndexOutOfBoundsException e) {
-            return new StringBuilder("0");
-        }
-
-        if (correctableRepresent.charAt(0) == '.')
-            correctableRepresent.insert(0, '0');
-
-        return correctableRepresent;
-    }
-
-    @NotNull
-    private Number checkTooLarge() throws TooLargeNumberException {
-
-        // If absolute value of a Number more than 'ABS_MAX_DECIMAL_VALUE'
-        if (this.abs().compareTo(ABS_MAX_DECIMAL_VALUE) > 0)
-            throw new TooLargeNumberException();
-
-        return this;
     }
 
     /* Getters */
 
-    public int getRadix() {
+    int getRadix() {
         return radix;
-    }
-
-    @NotNull
-    public String getSignedMinusRepresent() {
-        return signedMinusRepresent;
-    }
-
-    int getSignum() {
-        return signum;
     }
 
     @NotNull
     String getUnsignedRepresent() {
         return unsignedRepresent;
+    }
+
+    @NotNull
+    private String getRepresent() {
+        return (signum < 0) ? ("-" + unsignedRepresent) : (unsignedRepresent);
     }
 
     @NotNull
@@ -245,5 +233,9 @@ public final class Number implements Comparable<Number> {
     @NotNull
     String getFractionalPartRepresent() {
         return fractionalPartRepresent;
+    }
+
+    int signum() {
+        return signum;
     }
 }

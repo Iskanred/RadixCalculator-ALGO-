@@ -9,8 +9,19 @@ import java.math.RoundingMode;
 
 final class Converter {
 
-    @Deprecated
+    @Deprecated // FIXME: 8/19/2019
     static final int MAX_ROUNDING_AMOUNT = 10;
+
+    /**
+     * @deprecated useless unused constructor
+     * {@code Converter}-class doesn't require to create an instance to perform a converting
+     *
+     * And it requires to use public static method instead
+     *
+     * @see #getConversion(Number, int)
+     */
+    @Deprecated
+    private Converter() {}
 
     static Number getConversion(@NotNull final Number convertibleNumber, final int resultRadix) {
 
@@ -18,9 +29,9 @@ final class Converter {
         final int EXPONENT_RADIX = log(Math.min(convertibleNumber.getRadix(), resultRadix),
                 Math.max(convertibleNumber.getRadix(), resultRadix));
 
-        if (convertibleNumber.getRadix() == resultRadix || convertibleNumber.getUnsignedRepresent().equals("0") ||
-                convertibleNumber.getUnsignedRepresent().equals("1"))
-            return new Number(convertibleNumber);
+        if (convertibleNumber.getRadix() == resultRadix || convertibleNumber.equals(Number.ZERO) ||
+                convertibleNumber.equals(Number.POSITIVE_ONE) || convertibleNumber.equals(Number.NEGATIVE_ONE))
+            return convertibleNumber;
         else if (EXPONENT_RADIX != -1)
             return getFastConversion(convertibleNumber, resultRadix, EXPONENT_RADIX);
         else if (resultRadix == 10)
@@ -35,7 +46,7 @@ final class Converter {
         return Character.toUpperCase(Character.forDigit(digit, Number.MAX_RADIX));
     }
 
-    @Deprecated
+    @Deprecated // FIXME: 8/19/2019
     @NotNull
     private static Number getFastConversion (@NotNull final Number number, final int resultRadix, final int exponent) {
         /*
@@ -51,7 +62,7 @@ final class Converter {
 
     @NotNull
     private static Number getConversionToDecimal(@NotNull final Number number) {
-        BigDecimal result = BigDecimal.valueOf(0).setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
+        BigDecimal result = BigDecimal.ZERO.setScale(MAX_ROUNDING_AMOUNT, RoundingMode.HALF_UP);
 
         // Each digit will be raised to the power of this exponent (The max-exponent = integer_part.length - 1)
         int exp = number.getIntegerPartRepresent().length() - 1;
@@ -67,7 +78,7 @@ final class Converter {
             }
         }
 
-        return new Number(10, result.toPlainString(), number.getSignum());
+        return Number.valueOfUnsigned(10, result.toPlainString(), number.signum());
     }
 
     @NotNull
@@ -107,7 +118,7 @@ final class Converter {
             resultStr.append('.').append(resultStrFract);
         }
 
-        return new Number(resultRadix, resultStr.toString(), number.getSignum());
+        return Number.valueOfUnsigned(resultRadix, resultStr.toString(), number.signum());
     }
 
     private static int log(final int base, final int arg) {
